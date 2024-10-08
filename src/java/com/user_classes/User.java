@@ -10,12 +10,13 @@
 package java.com.user_classes;
 
 import java.time.*;
-import java.util.List;
+import java.util.*;
 
 public class User implements IUser {
 
-    public String name;
-    public String surname;
+    private String name;
+    private String username;
+    private String surname;
     private String phoneNumber;
     private String email;
     private String password;
@@ -40,13 +41,15 @@ public class User implements IUser {
      * @param password    This is a String param that represents the password
      *                    un-hashed of the user
      */
-    public User(String name, String surname, String phoneNumber, String email, String password) {
+    public User(String name, String surname, String phoneNumber, String email, String password, String username) {
+        this.username = username;
         this.name = name;
         this.surname = surname;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
         this.creationDate = Instant.now();
+        this.reservations = new ArrayList<>();
         this.activeReservation = false;
         this.isActive = false;
     }
@@ -88,8 +91,42 @@ public class User implements IUser {
     }
 
     @Override
+    /**
+     * This method will update the Username of the user
+     * 
+     * @implNote This method will need to be completed when something related to the
+     *           persistence is created
+     */
     public void setNewUsername(String Username) {
 
+    }
+
+    /**
+     * This class shows the active reservations of any User
+     */
+    public void showActiveReservations() {
+
+        if (this.reservations.isEmpty()) {
+            System.out.println("You don't have any active reservations");
+
+        } else {
+            System.out.println("You have the following reservations:");
+            for (Booking reservation : reservations) {
+                System.out.println(reservation.toString());
+            }
+        }
+
+    }
+
+    /**
+     * This class returns data that can be public, for personal usage.
+     * 
+     * @return Formatted data that have specific User account information
+     */
+    public String toString() {
+        String formattedUserInfo = String.format("Username: %s.\nName: %s.\nSurname: %s.\nEmail: %s.", this.username,
+                this.name, this.surname, this.email);
+        return formattedUserInfo;
     }
 
 }
