@@ -6,14 +6,12 @@
  * @version 1.0
  * @since 2024-10-07
  */
-
-package java.com.user_classes;
+package com.log_reg.user_classes;
 
 import java.time.*;
 import java.util.*;
 
 public class User implements IUser {
-
     private String name;
     private String username;
     private String surname;
@@ -106,7 +104,7 @@ public class User implements IUser {
      */
     public void showActiveReservations() {
 
-        if (this.reservations.isEmpty()) {
+        if (this.activeReservation) {
             System.out.println("You don't have any active reservations");
 
         } else {
@@ -115,7 +113,6 @@ public class User implements IUser {
                 System.out.println(reservation.toString());
             }
         }
-
     }
 
     /**
@@ -128,5 +125,4 @@ public class User implements IUser {
                 this.name, this.surname, this.email);
         return formattedUserInfo;
     }
-
 }
