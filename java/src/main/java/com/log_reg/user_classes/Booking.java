@@ -6,12 +6,11 @@
  * @version 1.0
  * @since 2024/10/08
  */
-package java.com.user_classes;
+package com.log_reg.user_classes;
 
 import java.time.*;
 
 public class Booking {
-
     private Integer totalPeople;
     private User userOwner;
     private LocalDateTime date;
