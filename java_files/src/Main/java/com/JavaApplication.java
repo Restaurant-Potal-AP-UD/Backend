@@ -1,13 +1,12 @@
-package java.com;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ComApplication {
+public class JavaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ComApplication.class, args);
+		SpringApplication.run(JavaApplication.class, args);
 	}
 
 }
