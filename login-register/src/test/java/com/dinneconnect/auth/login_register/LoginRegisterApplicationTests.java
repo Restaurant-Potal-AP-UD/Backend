@@ -1,10 +1,10 @@
-package com.java;
+package com.dinneconnect.auth.login_register;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class JavaApplicationTests {
+class LoginRegisterApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,12 +1,13 @@
+package com.dinneconnect.auth.login_register;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JavaApplication {
+public class LoginRegisterApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(JavaApplication.class, args);
+		SpringApplication.run(LoginRegisterApplication.class, args);
 	}
 
 }
