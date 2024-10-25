@@ -36,17 +36,15 @@ public class User {
     /**
      * Constructs a new User with the specified details.
      * 
-     * @param name        The name of the user.
-     * @param surname     The surname of the user.
-     * @param username    The username of the user.
-     * @param email       The email address of the user.
-     * @param phoneNumber The phone number of the user.
-     * @param password    The password of the user.
-     * @param restaurant  The primary restaurant associated with the user.
-     * @param restaurants A list of restaurants owned by the user.
+     * @param name        String - The name of the user.
+     * @param surname     String - The surname of the user.
+     * @param username    String - The username of the user.
+     * @param email       String - The email address of the user.
+     * @param phoneNumber String - The phone number of the user.
+     * @param password    String - The password of the user.
      */
     public User(String name, String surname, String username, String email, String phoneNumber,
-            String password, Restaurant restaurant) {
+            String password) {
         this.name = name;
         this.surname = surname;
         this.username = username;
