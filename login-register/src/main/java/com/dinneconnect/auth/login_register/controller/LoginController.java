@@ -1,31 +1,48 @@
 package com.dinneconnect.auth.login_register.controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dinneconnect.auth.login_register.models.LoginRequest;
-import com.dinneconnect.auth.login_register.models.LoginResponse;
+import com.dinneconnect.auth.login_register.DTO.UserRequestDTO;
+import com.dinneconnect.auth.login_register.models.User;
+import com.dinneconnect.auth.login_register.services.UserService;
+import com.dinneconnect.auth.login_register.utilities.UserUtilities;
+import com.dinneconnect.auth.login_register.DTO.LoginRequestDTO;
+import com.dinneconnect.auth.login_register.DTO.LoginResponseDTO;
 
 @RestController
 @RequestMapping("/api")
 public class LoginController {
 
-    @PostMapping("/sign-in/")
-    public LoginResponse login(@RequestBody LoginRequest authenticated) {
+    private UserService userService;
+    private UserUtilities utilities;
 
-        // This need to be changed when the JWT system is it connected.
-
-        if (authenticated.authUser()) {
-            return new LoginResponse("ajshdjashdjahsd", "User logged succesfully");
-        }
-        return new LoginResponse(null, "User credentials are incorrect");
+    @PostMapping("/auth-user/")
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO user) {
+        return null;
     }
 
-    @GetMapping("/mark/")
-    public String sayHello() {
-        return "Hello, World!";
+    @GetMapping("/users/")
+    public List<UserRequestDTO> getUsers() {
+        List<User> users = userService.getAllUsers();
+        return utilities.UsersToUserDTOs(users);
+    }
+
+    @GetMapping("/user/{id}")
+    public UserRequestDTO getUserById(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
+            return utilities.UserToUserDTO(user);
+        } catch (RuntimeException e) {
+            return new UserRequestDTO();
+        }
     }
 }

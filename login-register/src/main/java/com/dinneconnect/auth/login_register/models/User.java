@@ -1,12 +1,13 @@
 package com.dinneconnect.auth.login_register.models;
 
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * This class represents a User entity with various attributes related to user
@@ -97,29 +98,27 @@ public class User {
     private Boolean active;
 
     /**
-     * Identifier of the restaurant associated with the user.
+     * Number of restaurants associated with the user.
      */
-    private Integer restaurantId;
+    private Integer restaurantIds;
 
-    // Getters and Setters
-
-    /**
-     * Gets the unique identifier of the user.
-     * 
-     * @return the unique identifier of the user
-     */
-    public Long getId() {
-        return id;
+    public User() {
     }
 
-    /**
-     * Sets the unique identifier of the user.
-     * 
-     * @param id the unique identifier of the user
-     */
-    public void setId(Long id) {
-        this.id = id;
+    public User(String name, String surname, String username, String email, String password) {
+        this.name = name;
+        this.surname = surname;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.creationDate = LocalDateTime.now();
+        this.reservation = false;
+        this.verified = false;
+        this.active = false;
+        this.restaurantIds = 0;
     }
+    // ============================ Getters and Setters
+    // ============================================== //
 
     /**
      * Gets the name of the user.
@@ -191,24 +190,6 @@ public class User {
      */
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    /**
-     * Gets the hashed password of the user.
-     * 
-     * @return the hashed password of the user
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the hashed password of the user.
-     * 
-     * @param password the hashed password of the user
-     */
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     /**
@@ -288,16 +269,7 @@ public class User {
      * 
      * @return the identifier of the restaurant associated with the user
      */
-    public Integer getRestaurantId() {
-        return restaurantId;
-    }
-
-    /**
-     * Sets the identifier of the restaurant associated with the user.
-     * 
-     * @param restaurantId the identifier of the restaurant associated with the user
-     */
-    public void setRestaurantId(Integer restaurantId) {
-        this.restaurantId = restaurantId;
+    public Integer getRestaurantIds() {
+        return restaurantIds;
     }
 }

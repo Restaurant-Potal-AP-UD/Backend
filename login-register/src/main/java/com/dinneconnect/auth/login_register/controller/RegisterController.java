@@ -1,11 +1,15 @@
 package com.dinneconnect.auth.login_register.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dinneconnect.auth.login_register.models.RegisterResponse;
+import com.dinneconnect.auth.login_register.DTO.RegisterDTO;
 import com.dinneconnect.auth.login_register.models.User;
 
 @RestController
@@ -14,21 +18,15 @@ public class RegisterController {
 
     private User user;
 
-    @PostMapping("/sign-up")
-    public RegisterResponse registerUser(@RequestParam String name,
-            @RequestParam String surname,
-            @RequestParam String username,
-            @RequestParam String email,
-            @RequestParam String phoneNumber,
-            @RequestParam String password) {
-
-        // We need to find a way to storage data, also, this will be
-        // a form to create a new user that isn't be repeated
-        this.user = new User(name, surname, username, email, phoneNumber, password);
-        return new RegisterResponse("User created succesfully");
+    @PostMapping("/post-user/")
+    public Map<String, String> registerUser(@RequestBody RegisterDTO user) {
+        Map<String, String> response = new HashMap<>();
+        response.put("success", "user registered");
+        return response;
     }
 
-    public void addUserDB() {
-        // Add user to database
+    @GetMapping("/mark/")
+    public String mark() {
+        return "Puta";
     }
 }
