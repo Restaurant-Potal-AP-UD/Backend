@@ -1,20 +1,26 @@
 services:
-  app:
-    container_name: login-request-service
-    image: springboot-app
-    build: .
-    ports:
-      - 8080:8080
-  
   db:
     image: mysql:latest
     container_name: mysql_db
     ports:
-      - 3306:3306
-    expose:
-      - 3306
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: db_testing
       MYSQL_USER: "user_sebas"
       MYSQL_ROOT_PASSWORD: testing
       MYSQL_PASSWORD: testing
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  app:
+    container_name: login-request-service
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
