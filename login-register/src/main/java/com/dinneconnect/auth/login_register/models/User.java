@@ -2,6 +2,8 @@ package com.dinneconnect.auth.login_register.models;
 
 import java.time.LocalDateTime;
 
+import com.dinneconnect.auth.login_register.DTO.RegisterDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -105,12 +107,16 @@ public class User {
     public User() {
     }
 
-    public User(String name, String surname, String username, String email, String password) {
-        this.name = name;
-        this.surname = surname;
-        this.username = username;
-        this.email = email;
-        this.password = password;
+    /**
+     * 
+     * @param user
+     */
+    public User(RegisterDTO user) {
+        this.name = user.name;
+        this.surname = user.surname;
+        this.username = user.username;
+        this.email = user.email;
+        this.password = user.password;
         this.creationDate = LocalDateTime.now();
         this.reservation = false;
         this.verified = false;
