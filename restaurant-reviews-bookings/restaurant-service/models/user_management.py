@@ -55,7 +55,7 @@ class Booking(BaseModel):
 
     customer_name: str
     booking_date: str
-    number_of_people: int
+    people_quantity: int
 
 
 class Restaurant(BaseModel):
