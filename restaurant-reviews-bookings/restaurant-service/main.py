@@ -1,9 +1,29 @@
 from fastapi import FastAPI
-from routers.user_management_router import user_management_router  # Ajusta el import
+from SQL.models import Restaurant, Address, Booking
+from SQL.engine import engine, SessionLocal
+from routers.user_restaurant import user_restaurant_router
+
+Restaurant.__table__.create(bind=engine, checkfirst=True)
+Booking.__table__.create(bind=engine, checkfirst=True)
+Address.__table__.create(bind=engine, checkfirst=True)
+
+
+def get_db():
+    """
+    Dependency to provide a database session.
+
+    Yields:
+        db (SessionLocal): Database session.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 app = FastAPI()
-
-app.include_router(user_management_router, tags=["users"])
+app.add_api_route(user_restaurant_router)
 
 
 @app.get("/")
