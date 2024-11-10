@@ -6,10 +6,10 @@ from SQL.engine import Base
 class User(Base):
     __tablename__ = "User"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    surname = Column(String)
-    email = Column(String)
-    password = Column(String)
+    name = Column(String(100))
+    surname = Column(String(100))
+    email = Column(String(100))
+    password = Column(String(100))
     creation_date = Column(DateTime)
     reservation = Column(Boolean)
     active = Column(Boolean)
@@ -24,10 +24,10 @@ class User(Base):
 class Address(Base):
     __tablename__ = "Address"
     id = Column(Integer, primary_key=True)
-    street = Column(String)
-    city = Column(String)
+    street = Column(String(100))
+    city = Column(String(100))
     zip_code = Column(Integer)
-    location = Column(String)
+    location = Column(String(100))
     restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))
 
     # Relación inversa con Restaurant

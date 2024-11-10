@@ -1,12 +1,9 @@
 from fastapi import FastAPI
-from SQL.models import Restaurant, Address, Booking
+from SQL import models
 from SQL.engine import engine, SessionLocal
 from routers.user_restaurant import user_restaurant_router
 
-Restaurant.__table__.create(bind=engine, checkfirst=True)
-Booking.__table__.create(bind=engine, checkfirst=True)
-Address.__table__.create(bind=engine, checkfirst=True)
-
+models.Base.metadata.create_all(bind=engine)
 
 def get_db():
     """
@@ -23,7 +20,8 @@ def get_db():
 
 
 app = FastAPI()
-app.add_api_route(user_restaurant_router)
+
+app.include_router(user_restaurant_router)
 
 
 @app.get("/")

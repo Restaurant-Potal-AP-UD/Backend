@@ -8,8 +8,8 @@ COPY requeriments.txt .
 
 RUN pip install --no-cache-dir -r requeriments.txt
 
-COPY restaurant-reviews-bookings/restaurant-service/* /service1/python/
+COPY restaurant-reviews-bookings/restaurant-service /service1/python/
 
 EXPOSE 8001
 
-CMD [ "uvicorn", "app:main", "--port", "8001", "--reload" ]
+CMD [ "uvicorn", "main:app", "--port", "8001", "--reload" ]
