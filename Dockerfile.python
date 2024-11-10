@@ -1,0 +1,15 @@
+FROM python:3.12.7
+
+LABEL author="Sebastian Avendaño Rodriguez"
+
+WORKDIR /service1/python
+
+COPY requeriments.txt .
+
+RUN pip install --no-cache-dir -r requeriments.txt
+
+COPY restaurant-reviews-bookings/restaurant-service /service1/python/
+
+EXPOSE 8001
+
+CMD [ "uvicorn", "main:app", "--port", "8001", "--reload" ]
