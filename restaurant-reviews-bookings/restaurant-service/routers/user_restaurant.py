@@ -29,7 +29,7 @@ def get_restaurants():
 
 @user_restaurant_router.post("/api/create/restaurant/{user_id}")
 def post_user_restaurant(
-    restaurant_name: str, user_id: int, headers: Annotated[CommonHeaders, Header()]
+    restaurant_name: str, user_id: int, #headers: Annotated[CommonHeaders, Header()]
 ):
 
     # Añadir validacion de header, debido a que el frontend envia el "user_id" (debe de estar encriptado)
