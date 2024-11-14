@@ -34,6 +34,7 @@ import jakarta.persistence.Table;
  * 
  * @author
  */
+
 @Entity
 @Table(name = "User")
 public class User {
