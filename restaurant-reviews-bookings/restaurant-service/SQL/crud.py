@@ -12,7 +12,7 @@ Description: This module provides functions to create, read, update, and delete 
 from http.client import HTTPException
 from typing import Optional
 from SQL.engine import SessionLocal
-from SQL.models import Address, Booking, Restaurant, User
+from SQL.models import Address, Booking, Restaurant
 
 db = SessionLocal()
 
@@ -63,7 +63,7 @@ def create_restaurant(data: dict, user_data: int):
     return {"success": "The restaurant has been successfully registered"}
 
 
-def create_booking(data: dict, user_data: User, restaurant_id: int):
+def create_booking(data: dict, user_data: int, restaurant_id: int):
     """
     Create a new booking for a specific user and restaurant.
 
@@ -76,7 +76,7 @@ def create_booking(data: dict, user_data: User, restaurant_id: int):
         dict: Success message confirming booking registration.
     """
     booking = Booking(
-        customer_id=user_data.id,
+        customer_id=user_data,
         restaurant_id=restaurant_id,
         booking_date=data.get("booking_date"),
         people_quantity=data.get("quantity"),
@@ -118,7 +118,7 @@ def read_addresses(restaurant_id: int):
 
 
 def read_booking(
-    user_id: Optional[User] = None, restaurant_id: Optional[Booking] = None
+    user_id: Optional[int] = None, restaurant_id: Optional[Booking] = None
 ):
     """
     Retrieve bookings based on a user ID or restaurant ID.
@@ -190,7 +190,7 @@ def update_address(data: dict, address_id: int):
     return {"Success": "The information has been changed correctly"}
 
 
-def update_restaurant(current_user: User, restaurant_name: Optional[str] = None):
+def update_restaurant(current_user: int, restaurant_name: Optional[str] = None):
     """
     Update restaurant information for the current user (owner).
 
@@ -203,7 +203,7 @@ def update_restaurant(current_user: User, restaurant_name: Optional[str] = None)
     """
     restaurant = (
         db.query(Restaurant)
-        .filter(Restaurant.restaurant_owner_id == current_user.id)
+        .filter(Restaurant.restaurant_owner_id == current_user)
         .first()
     )
     restaurant.restaurant_name = restaurant_name
@@ -240,7 +240,7 @@ def delete_address(address_id: int):
     raise HTTPException(status_code=404, detail="There is no address")
 
 
-def delete_booking(current_user: User):
+def delete_booking(current_user: int):
     """
     Delete a booking associated with the current user (customer).
 
@@ -253,7 +253,7 @@ def delete_booking(current_user: User):
     Raises:
         HTTPException: If the booking does not exist.
     """
-    booking = db.query(Booking).filter(Booking.customer_id == current_user.id).first()
+    booking = db.query(Booking).filter(Booking.customer_id == current_user).first()
     if booking:
         db.delete(booking)
         db.commit()
@@ -262,7 +262,7 @@ def delete_booking(current_user: User):
     raise HTTPException(status_code=404, detail="There is no booking")
 
 
-def delete_restaurant(current_user: User):
+def delete_restaurant(current_user: int):
     """
     Delete the restaurant associated with the current user (owner).
 
@@ -277,7 +277,7 @@ def delete_restaurant(current_user: User):
     """
     restaurant = (
         db.query(Restaurant)
-        .filter(Restaurant.restaurant_owner_id == current_user.id)
+        .filter(Restaurant.restaurant_owner_id == current_user)
         .first()
     )
 

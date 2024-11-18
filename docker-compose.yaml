@@ -1,21 +1,21 @@
 services:
-
-  app1:
+  appjava:
     container_name: login-request-service
     build: 
       context: .
       dockerfile: Dockerfile.java
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/java_db
+      - SPRING_DATASOURCE_USERNAME=java_user
+      - SPRING_DATASOURCE_PASSWORD=testing
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/db_testing
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=testing
     depends_on:
       db:
         condition: service_healthy
-        
-  app2:
+
+
+  apppython:
     container_name: restaurant-review-service
     build: 
       context: .
@@ -25,26 +25,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      
+
 
   db:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: mysql_db
     ports:
       - "3306:3306"
-    volumes:
-      - db-data:/var/lib/mysql
+    restart: always
     environment:
-      MYSQL_DATABASE: db_testing
       MYSQL_ROOT_PASSWORD: testing
-      MYSQL_PASSWORD: testing
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-
-volumes:
-  db-data:
-    external: false

@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Database URL for SQLAlchemy connection
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:testing@db:3306/db_testing"
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://python_user:testing@db:3306/python_db"
 
 # Create the SQLAlchemy engine
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

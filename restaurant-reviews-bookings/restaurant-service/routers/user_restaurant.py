@@ -10,7 +10,8 @@ user_restaurant_router = APIRouter()
 
 
 @user_restaurant_router.get("/api/get/restaurant/{user_id}", response_model=Restaurant)
-def get_user_restaurant(user_id: int, headers: Annotated[CommonHeaders, Header()]):
+def get_user_restaurant(user_id: int, #headers: Annotated[CommonHeaders, Header()]
+                        ):
 
     # Añadir validacion de header, debido a que el frontend envia el "user_id" (debe de estar encriptado)
     # La validacion verifica que el user_id enviado y el user_id en el "Authorization bearer (header)"
@@ -27,7 +28,7 @@ def get_restaurants():
 # ============================= POST METHODS =================================== #
 
 
-@user_restaurant_router.post("/api/create/restaurant/{user_id}")
+@user_restaurant_router.post("/api/create/restaurant/")
 def post_user_restaurant(
     restaurant_name: str, user_id: int, #headers: Annotated[CommonHeaders, Header()]
 ):
