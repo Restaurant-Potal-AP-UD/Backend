@@ -56,13 +56,4 @@ public class LoginRequestDTO {
     public String getHashed_password() {
         return hashed_password;
     }
-
-    /**
-     * Sets the hashed password of the user.
-     * 
-     * @param hashed_password the hashed password to set
-     */
-    public void setHashed_password(String hashed_password) {
-        this.hashed_password = hashed_password;
-    }
 }

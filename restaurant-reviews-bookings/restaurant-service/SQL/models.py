@@ -19,7 +19,7 @@ class Address(Base):
 class Booking(Base):
     __tablename__ = "Booking"
     id = Column(Integer, primary_key=True)
-    customer_id = Column(Integer)
+    customer = Column(String(100))
     restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))
     booking_date = Column(DateTime)
     people_quantity = Column(Integer, default=0)
@@ -31,8 +31,8 @@ class Restaurant(Base):
     __tablename__ = "Restaurant"
     id = Column(Integer, primary_key=True)
     restaurant_name = Column(String(80))
-    restaurant_owner_id = Column(Integer)
-    
+    restaurant_owner = Column(String(100))
+
     addresses = relationship(
         "Address", back_populates="restaurant", cascade="all, delete"
     )

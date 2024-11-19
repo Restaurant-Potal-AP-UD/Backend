@@ -1,5 +1,11 @@
 package com.dinneconnect.auth.login_register.DTO;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
+
 /**
  * This module handles data transfer objects (DTOs) for user authentication
  * responses.
@@ -10,8 +16,11 @@ package com.dinneconnect.auth.login_register.DTO;
  */
 public class LoginResponseDTO {
 
-    private String email;
     private String token;
+    private Date caducationDate;
+
+    public LoginResponseDTO(){
+    }
 
     /**
      * Constructs a new LoginResponseDTO with the specified email.
@@ -20,43 +29,20 @@ public class LoginResponseDTO {
      * @param email the email address of the user
      */
     public LoginResponseDTO(String email) {
-        this.email = email;
-        this.token = "JASHDjahskdhasudyOH"; // Placeholder for JWT implementation
+
+        Map<String, String> info = new HashMap<String, String>();
+        info.put("userEmail", email);
+
+        this.token = JWTUtilities.generateToken(info);
+        this.caducationDate = new Date(System.currentTimeMillis() + 1800000);
+
     }
 
-    /**
-     * Gets the email address of the user.
-     * 
-     * @return the email
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the email address of the user.
-     * 
-     * @param email the email to set
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * Gets the token.
-     * 
-     * @return the token
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * Sets the token.
-     * 
-     * @param token the token to set
-     */
-    public void setToken(String token) {
-        this.token = token;
+    public Map<String, String> getValue(){
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("token", this.token);
+        data.put("Caducation", this.caducationDate.toString());
+        
+        return data;
     }
 }

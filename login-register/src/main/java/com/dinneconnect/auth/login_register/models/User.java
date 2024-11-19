@@ -87,7 +87,7 @@ public class User {
     /**
      * Reservation status of the user.
      */
-    @Column(unique = true, updatable = true)
+    @Column(unique = false, updatable = true)
     private Boolean reservation;
 
     /**
@@ -100,10 +100,6 @@ public class User {
      */
     private Boolean active;
 
-    /**
-     * Number of restaurants associated with the user.
-     */
-    private Integer restaurantIds;
 
     public User() {
     }
@@ -122,8 +118,12 @@ public class User {
         this.reservation = false;
         this.verified = false;
         this.active = false;
-        this.restaurantIds = 0;
     }
+    
+    public Boolean verifyPassword(String password){
+        return (this.password.equals(password));
+    }
+    
     // ============================ Getters and Setters
     // ============================================== //
 
@@ -269,14 +269,5 @@ public class User {
      */
     public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    /**
-     * Gets the identifier of the restaurant associated with the user.
-     * 
-     * @return the identifier of the restaurant associated with the user
-     */
-    public Integer getRestaurantIds() {
-        return restaurantIds;
     }
 }

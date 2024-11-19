@@ -21,7 +21,7 @@ Source: http://opensource.org/licenses/GPL-3.0
 """
 
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class Address(BaseModel):
@@ -53,7 +53,7 @@ class Booking(BaseModel):
         number_of_people (int): Number of people for the booking.
     """
 
-    customer_name: str
+    customer_name: EmailStr
     booking_date: str
     people_quantity: int
 
@@ -71,7 +71,6 @@ class Restaurant(BaseModel):
     """
 
     restaurant_name: str
-    restaurant_owner: str
-    restaurant_address: Address
+    restaurant_owner: EmailStr
     restaurant_addresses: List[Address | None]
     restaurant_bookings: List[Booking | None]
