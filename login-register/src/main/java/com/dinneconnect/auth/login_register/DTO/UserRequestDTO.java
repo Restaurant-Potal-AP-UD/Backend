@@ -16,7 +16,6 @@ public class UserRequestDTO {
     private String creationDate;
     private Boolean verified;
     private Boolean reservation;
-    private Integer restaurantIds;
 
     /**
      * Constructs a new UserRequestDTO.
@@ -30,14 +29,13 @@ public class UserRequestDTO {
      * @param restaurantIds the user's associated restaurant IDs
      */
     public UserRequestDTO(String name, String surname, String email, String creationDate, Boolean verified,
-            Boolean reservation, Integer restaurantIds) {
+            Boolean reservation) {
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.creationDate = creationDate;
         this.verified = verified;
         this.reservation = reservation;
-        this.restaurantIds = restaurantIds;
     }
 
     public UserRequestDTO() {
@@ -150,23 +148,5 @@ public class UserRequestDTO {
      */
     public void setReservation(Boolean reservation) {
         this.reservation = reservation;
-    }
-
-    /**
-     * Gets the user's associated restaurant IDs.
-     * 
-     * @return the restaurantIds
-     */
-    public Integer getRestaurantIds() {
-        return restaurantIds;
-    }
-
-    /**
-     * Sets the user's associated restaurant IDs.
-     * 
-     * @param restaurantIds the restaurantIds to set
-     */
-    public void setRestaurantIds(Integer restaurantIds) {
-        this.restaurantIds = restaurantIds;
     }
 }

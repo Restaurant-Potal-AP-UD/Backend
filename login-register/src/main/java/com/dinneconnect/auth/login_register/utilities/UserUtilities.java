@@ -30,8 +30,7 @@ public class UserUtilities {
                 user.getEmail(),
                 user.getCreationDate().toString(),
                 user.getVerified(),
-                user.getReservation(),
-                user.getRestaurantIds());
+                user.getReservation());
     }
 
     /**

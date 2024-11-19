@@ -19,13 +19,12 @@ db = SessionLocal()
 # ====================================== CREATE ================================== #
 
 
-def create_address(data: dict, restaurant_id: int):
+def create_address(data: dict):
     """
     Create a new address associated with a specific restaurant.
 
     Args:
-        data (dict): Dictionary containing address details (street, city, zip_code, location).
-        restaurant_id (int): ID of the restaurant the address is associated with.
+        data (dict): Dictionary containing address details (street, city, zip_code, location, restaurant_id).
 
     Returns:
         dict: Success message confirming address registration.
@@ -35,7 +34,7 @@ def create_address(data: dict, restaurant_id: int):
         city=data.get("city"),
         zip_code=data.get("zip_code"),
         location=data.get("location"),
-        restaurant_id=restaurant_id,
+        restaurant_id=data.get("restaurant_id"),
     )
     db.add(address)
     db.commit()
@@ -43,19 +42,18 @@ def create_address(data: dict, restaurant_id: int):
     return {"success": "The address has been successfully registered"}
 
 
-def create_restaurant(data: dict, user_data: int):
+def create_restaurant(data: dict):
     """
     Create a new restaurant associated with a specific user (owner).
 
     Args:
-        data (dict): Dictionary containing restaurant details (restaurant_name).
-        user_data (User): The User object representing the owner of the restaurant.
+        data (dict): Dictionary containing restaurant details (restaurant_name, user).
 
     Returns:
         dict: Success message confirming restaurant registration.
     """
     restaurant = Restaurant(
-        restaurant_name=data.get("restaurant_name"), restaurant_owner_id=user_data
+        restaurant_name=data.get("restaurant_name"), restaurant_owner=data.get("user")
     )
     db.add(restaurant)
     db.commit()
@@ -63,7 +61,7 @@ def create_restaurant(data: dict, user_data: int):
     return {"success": "The restaurant has been successfully registered"}
 
 
-def create_booking(data: dict, user_data: int, restaurant_id: int):
+def create_booking(data: dict):
     """
     Create a new booking for a specific user and restaurant.
 
@@ -76,8 +74,8 @@ def create_booking(data: dict, user_data: int, restaurant_id: int):
         dict: Success message confirming booking registration.
     """
     booking = Booking(
-        customer_id=user_data,
-        restaurant_id=restaurant_id,
+        customer_id=data.get("user"),
+        restaurant_id=data.get("restaurant_id"),
         booking_date=data.get("booking_date"),
         people_quantity=data.get("quantity"),
     )
@@ -89,19 +87,6 @@ def create_booking(data: dict, user_data: int, restaurant_id: int):
 
 
 # ====================================== READ ==================================== #
-
-
-def read_address_by_R_id(restaurant_id: int):
-    """
-    Retrieve a single address associated with a specific restaurant by its ID.
-
-    Args:
-        restaurant_id (int): ID of the restaurant.
-
-    Returns:
-        Address: The Address object for the specified restaurant, or None if not found.
-    """
-    return db.query(Address).filter(Address.restaurant_id == restaurant_id).first()
 
 
 def read_addresses(restaurant_id: int):
@@ -143,20 +128,18 @@ def read_booking(
         return db.query(Booking).filter(Booking.restaurant_id == restaurant_id).all()
 
 
-def read_restaurant(current_user: int):
+def read_restaurant(current_user: str):
     """
     Retrieve the restaurant associated with the current user (owner).
 
     Args:
-        current_user (int): integer object representing the restaurant owner id.
+        current_user (str): Email object representing the restaurant owner email.
 
     Returns:
         Restaurant: The Restaurant object for the specified user, or None if not found.
     """
     return (
-        db.query(Restaurant)
-        .filter(Restaurant.restaurant_owner_id == current_user)
-        .first()
+        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
     )
 
 

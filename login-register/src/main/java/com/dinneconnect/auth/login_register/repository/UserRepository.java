@@ -6,4 +6,6 @@ import com.dinneconnect.auth.login_register.models.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    User findByEmail(String email);
+
 }
