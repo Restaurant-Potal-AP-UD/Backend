@@ -33,7 +33,6 @@ public class JWTUtilities {
                 
     }
 
-     // Método para verificar y decodificar un token
     public static Map<String, Object> verifyToken(String token) {
         try {
             Claims claims = Jwts.parser()

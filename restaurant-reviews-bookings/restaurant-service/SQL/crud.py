@@ -9,8 +9,9 @@ Description: This module provides functions to create, read, update, and delete 
 
 """
 
+from datetime import datetime
 from http.client import HTTPException
-from typing import Optional
+from typing import List, Optional
 from SQL.engine import SessionLocal
 from SQL.models import Address, Booking, Restaurant
 
@@ -66,15 +67,13 @@ def create_booking(data: dict):
     Create a new booking for a specific user and restaurant.
 
     Args:
-        data (dict): Dictionary containing booking details (booking_date, quantity).
-        user_data (User): The User object representing the customer making the booking.
-        restaurant_id (int): ID of the restaurant associated with the booking.
+        data (dict): Dictionary containing booking details (user, restaurant_id, booking_date, quantity).
 
     Returns:
         dict: Success message confirming booking registration.
     """
     booking = Booking(
-        customer_id=data.get("user"),
+        customer=data.get("user"),
         restaurant_id=data.get("restaurant_id"),
         booking_date=data.get("booking_date"),
         people_quantity=data.get("quantity"),
@@ -102,27 +101,27 @@ def read_addresses(restaurant_id: int):
     return db.query(Address).filter(Address.restaurant_id == restaurant_id).all()
 
 
-def read_booking(
-    user_id: Optional[int] = None, restaurant_id: Optional[Booking] = None
-):
+def read_bookings(
+    user_email: Optional[str] = None, restaurant_id: Optional[int] = None
+) -> List[Booking]:
     """
-    Retrieve bookings based on a user ID or restaurant ID.
+    Retrieve bookings based on a user email or restaurant ID.
 
     Args:
-        user_id (Optional[User]): User object to filter bookings by customer ID.
-        restaurant_id (Optional[Booking]): Booking object to filter bookings by restaurant ID.
+        user_email (Optional[str]): Email of the user to filter bookings by customer.
+        restaurant_id (Optional[int]): ID of the restaurant to filter bookings.
 
     Returns:
         list: List of Booking objects that match the specified criteria.
 
     Raises:
-        HTTPException: If both user_id and restaurant_id are provided simultaneously.
+        HTTPException: If both user_email and restaurant_id are provided simultaneously.
     """
-    if user_id is not None and restaurant_id is not None:
+    if user_email is not None and restaurant_id is not None:
         raise HTTPException(status_code=400, detail="Please, set the correct data")
 
-    if user_id is not None:
-        return db.query(Booking).filter(Booking.customer_id == user_id.id).all()
+    if user_email is not None:
+        return db.query(Booking).filter(Booking.customer == user_email).all()
 
     if restaurant_id is not None:
         return db.query(Booking).filter(Booking.restaurant_id == restaurant_id).all()
@@ -133,7 +132,7 @@ def read_restaurant(current_user: str):
     Retrieve the restaurant associated with the current user (owner).
 
     Args:
-        current_user (str): Email object representing the restaurant owner email.
+        current_user (str): Email of the restaurant owner.
 
     Returns:
         Restaurant: The Restaurant object for the specified user, or None if not found.
@@ -143,7 +142,13 @@ def read_restaurant(current_user: str):
     )
 
 
-def read_restaurants():
+def read_restaurants() -> List[Restaurant]:
+    """
+    Retrieve all restaurants from the database.
+
+    Returns:
+        list: List of all Restaurant objects.
+    """
     return list(db.query(Restaurant).all())
 
 
@@ -162,37 +167,83 @@ def update_address(data: dict, address_id: int):
         dict: Success message confirming the update.
     """
     address = db.query(Address).filter(Address.id == address_id).first()
-    address.city = data.get("city")
-    address.location = data.get("location")
-    address.street = data.get("street")
-    address.zip_code = data.get("zip_code")
+    if address:
+        address.city = data.get("city")
+        address.location = data.get("location")
+        address.street = data.get("street")
+        address.zip_code = data.get("zip_code")
 
-    db.commit()
-    db.refresh(address)
+        db.commit()
+        db.refresh(address)
 
-    return {"Success": "The information has been changed correctly"}
+        return {"Success": "The information has been changed correctly"}
+
+    raise HTTPException(status_code=404, detail="Address not found")
 
 
-def update_restaurant(current_user: int, restaurant_name: Optional[str] = None):
+def update_restaurant(current_user: str, restaurant_name: Optional[str] = None):
     """
     Update restaurant information for the current user (owner).
 
     Args:
-        current_user (User): User object representing the restaurant owner.
+        current_user (str): Email of the restaurant owner.
         restaurant_name (Optional[str]): New name for the restaurant.
 
     Returns:
         dict: Success message confirming the update.
+
+    Raises:
+        HTTPException: If there is no restaurant associated with the account.
     """
     restaurant = (
-        db.query(Restaurant)
-        .filter(Restaurant.restaurant_owner_id == current_user)
-        .first()
+        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
     )
-    restaurant.restaurant_name = restaurant_name
-    db.commit()
-    db.refresh(restaurant)
-    return {"Success": "The information has been changed correctly"}
+    if restaurant:
+        if restaurant_name is not None:
+            restaurant.restaurant_name = restaurant_name
+        db.commit()
+        db.refresh(restaurant)
+        return {"Success": "The information has been changed correctly"}
+
+    raise HTTPException(
+        status_code=404, detail="There is no restaurant associated with this account"
+    )
+
+
+def update_booking(
+    current_user: str,
+    people_quantity: Optional[int] = None,
+    booking_date: Optional[datetime] = None,
+):
+    """
+    Update booking information for the current user.
+
+    Args:
+        current_user (str): Email of the customer.
+        people_quantity (Optional[int]): New quantity of people for the booking.
+        booking_date (Optional[datetime]): New date for the booking.
+
+    Returns:
+        dict: Success message confirming the update.
+
+    Raises:
+        HTTPException: If there is no active reservation with the account.
+    """
+    booking = db.query(Booking).filter(Booking.customer == current_user).first()
+
+    if booking:
+        if people_quantity is not None:
+            booking.people_quantity = people_quantity
+        if booking_date is not None:
+            booking.booking_date = booking_date
+
+        db.commit()
+        db.refresh(booking)
+        return {"Success": "The booking has been updated correctly"}
+
+    raise HTTPException(
+        status_code=404, detail="There is no active reservation with your account"
+    )
 
 
 # ====================================== DELETE ================================== #
@@ -223,12 +274,12 @@ def delete_address(address_id: int):
     raise HTTPException(status_code=404, detail="There is no address")
 
 
-def delete_booking(current_user: int):
+def delete_booking(current_user: str):
     """
     Delete a booking associated with the current user (customer).
 
     Args:
-        current_user (User): User object representing the customer.
+        current_user (str): Email of the customer.
 
     Returns:
         dict: Success message confirming the deletion.
@@ -236,7 +287,7 @@ def delete_booking(current_user: int):
     Raises:
         HTTPException: If the booking does not exist.
     """
-    booking = db.query(Booking).filter(Booking.customer_id == current_user).first()
+    booking = db.query(Booking).filter(Booking.customer == current_user).first()
     if booking:
         db.delete(booking)
         db.commit()
@@ -245,12 +296,12 @@ def delete_booking(current_user: int):
     raise HTTPException(status_code=404, detail="There is no booking")
 
 
-def delete_restaurant(current_user: int):
+def delete_restaurant(current_user: str):
     """
     Delete the restaurant associated with the current user (owner).
 
     Args:
-        current_user (User): User object representing the restaurant owner.
+        current_user (str): Email of the restaurant owner.
 
     Returns:
         dict: Success message confirming the deletion.
@@ -259,9 +310,7 @@ def delete_restaurant(current_user: int):
         HTTPException: If the restaurant does not exist.
     """
     restaurant = (
-        db.query(Restaurant)
-        .filter(Restaurant.restaurant_owner_id == current_user)
-        .first()
+        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
     )
 
     if restaurant:
