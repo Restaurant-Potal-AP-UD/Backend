@@ -48,12 +48,12 @@ class Booking(BaseModel):
     Class representing a booking at the restaurant.
 
     Attributes:
-        customer_name (str): Name of the customer making the booking.
+        customer(str): Email of the customer making the booking.
         booking_date (str): Date of the booking.
         number_of_people (int): Number of people for the booking.
     """
 
-    customer_name: EmailStr
+    customer: EmailStr
     booking_date: str
     people_quantity: int
 
