@@ -3,6 +3,7 @@ package com.dinneconnect.auth.login_register.DTO;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
 
@@ -19,30 +20,30 @@ public class LoginResponseDTO {
     private String token;
     private Date caducationDate;
 
-    public LoginResponseDTO(){
+    public LoginResponseDTO() {
     }
 
     /**
      * Constructs a new LoginResponseDTO with the specified email.
      * The token should be a JWT in the future.
      * 
-     * @param email the email address of the user
+     * @param uuid the UUID of the user
      */
-    public LoginResponseDTO(String email) {
+    public LoginResponseDTO(UUID uuid) {
 
         Map<String, String> info = new HashMap<String, String>();
-        info.put("userEmail", email);
+        info.put("userID", uuid.toString());
 
         this.token = JWTUtilities.generateToken(info);
         this.caducationDate = new Date(System.currentTimeMillis() + 1800000);
 
     }
 
-    public Map<String, String> getValue(){
+    public Map<String, String> getValue() {
         Map<String, String> data = new HashMap<String, String>();
         data.put("token", this.token);
         data.put("Caducation", this.caducationDate.toString());
-        
+
         return data;
     }
 }

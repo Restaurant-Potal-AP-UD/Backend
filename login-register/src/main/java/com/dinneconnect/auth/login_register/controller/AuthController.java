@@ -1,30 +1,26 @@
 package com.dinneconnect.auth.login_register.controller;
 
-
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dinneconnect.auth.login_register.DTO.UserRequestDTO;
 import com.dinneconnect.auth.login_register.models.User;
 import com.dinneconnect.auth.login_register.services.UserService;
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
-import com.dinneconnect.auth.login_register.utilities.UserUtilities;
-
 
 import com.dinneconnect.auth.login_register.DTO.LoginRequestDTO;
 import com.dinneconnect.auth.login_register.DTO.LoginResponseDTO;
 
 /**
- * REST controller for handling user authentication and retrieval.
+ * AuthController is a REST controller that handles user authentication
+ * and token verification for login and registration processes.
+ * It provides endpoints for generating tokens and verifying them.
  * 
  * @author Sebastian Avendaño Rodriguez
  * @since 2024/11/04
@@ -34,68 +30,52 @@ import com.dinneconnect.auth.login_register.DTO.LoginResponseDTO;
 @RequestMapping("/api")
 public class AuthController {
 
+    /**
+     * The UserService instance used for user-related operations.
+     */
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserUtilities utilities;
-
+    /**
+     * Endpoint to verify the provided JWT token.
+     * 
+     * @param authToken the authorization token sent in the request header
+     * @return a map containing the verification result of the token
+     */
     @GetMapping("/verify-token/")
     public Map<String, Object> verify(@RequestHeader("Authorization") String authToken) {
-        // Remover el prefijo "Bearer" si existe
+        // Check if the token starts with "Bearer " and remove it if present
         if (authToken.startsWith("Bearer ")) {
             authToken = authToken.substring(7);
         }
 
-        // Verifica el token y retorna los claims
+        // Verify the token using JWTUtilities and return the result
         return JWTUtilities.verifyToken(authToken);
     }
 
     /**
-     * Authenticates a user.
+     * Endpoint for user login, which authenticates a user and generates a token.
      * 
-     * @param user the user login details
-     * @return the login response
+     * @param user the login request containing user email and hashed password
+     * @return a LoginResponseDTO containing the user's ID if authentication is
+     *         successful,
+     *         or an empty response if authentication fails
      */
     @PostMapping("/generate-token/")
     public LoginResponseDTO login(@RequestBody LoginRequestDTO user) {
-
+        // Retrieve the user by email from the user service
         User user_auth = userService.getUserByEmail(user.getEmail());
-        if (user_auth.verifyPassword(user.getHashed_password())){
-            LoginResponseDTO login = new LoginResponseDTO(user.getEmail());
+
+        // Verify the password provided in the login request
+        if (user_auth.verifyPassword(user.getHashed_password())) {
+            // If authentication is successful, return a response with the user's ID
+            LoginResponseDTO login = new LoginResponseDTO(user_auth.getId());
             return login;
         }
 
+        // If authentication fails, return an empty LoginResponseDTO
         return new LoginResponseDTO();
-         // Implement login logic
+        // Future implementation for handling failed login attempts can be added here
     }
 
-    // NEEDED TO IMPLEMENT ENDPOINT CONFIGURATIONS BASED ON ROLES
-
-    /**
-     * Retrieves a list of all users.
-     * 
-     * @return a list of UserRequestDTOs
-     */
-    @GetMapping("/users/")
-    public List<UserRequestDTO> getUsers() {
-        List<User> users = userService.getAllUsers();
-        return utilities.UsersToUserDTOs(users);
-    }
-
-    /**
-     * Retrieves a user by their ID.
-     * 
-     * @param id the ID of the user
-     * @return the user details
-     */
-    @GetMapping("/user/{id}")
-    public UserRequestDTO getUserById(@PathVariable Long id) {
-        try {
-            User user = userService.getUserById(id);
-            return utilities.UserToUserDTO(user);
-        } catch (RuntimeException e) {
-            return new UserRequestDTO(); // Handle user not found scenario
-        }
-    }
 }

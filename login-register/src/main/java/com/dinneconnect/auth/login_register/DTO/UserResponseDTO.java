@@ -1,5 +1,7 @@
 package com.dinneconnect.auth.login_register.DTO;
 
+import java.util.UUID;
+
 /**
  * This module handles data transfer objects (DTOs) for user-related operations.
  * In general, to show low-level user information.
@@ -8,10 +10,15 @@ package com.dinneconnect.auth.login_register.DTO;
  * @since 2024-11-02
  * @author Sebasian Avendaño Rodriguez
  */
-public class UserRequestDTO {
+public class UserResponseDTO {
 
+    @SuppressWarnings("unused")
+    private String message;
+
+    private UUID id;
     private String name;
     private String surname;
+    private String username;
     private String email;
     private String creationDate;
     private Boolean verified;
@@ -28,18 +35,31 @@ public class UserRequestDTO {
      * @param reservation   whether the user has reservations
      * @param restaurantIds the user's associated restaurant IDs
      */
-    public UserRequestDTO(String name, String surname, String email, String creationDate, Boolean verified,
+    public UserResponseDTO(UUID user_id, String name, String surname, String username, String email,
+            String creationDate,
+            Boolean verified,
             Boolean reservation) {
+
+        this.id = user_id;
         this.name = name;
         this.surname = surname;
+        this.username = username;
         this.email = email;
         this.creationDate = creationDate;
         this.verified = verified;
         this.reservation = reservation;
     }
 
-    public UserRequestDTO() {
+    public UserResponseDTO(String message) {
+        this.message = message;
+    }
 
+    public UserResponseDTO() {
+
+    }
+
+    public String getId() {
+        return id.toString();
     }
 
     /**
@@ -76,6 +96,14 @@ public class UserRequestDTO {
      */
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     /**

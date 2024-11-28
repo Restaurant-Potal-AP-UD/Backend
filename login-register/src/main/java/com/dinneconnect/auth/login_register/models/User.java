@@ -1,13 +1,13 @@
 package com.dinneconnect.auth.login_register.models;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.dinneconnect.auth.login_register.DTO.RegisterDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -44,9 +44,9 @@ public class User {
      * This value is generated automatically.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, nullable = false)
-    private Long id;
+    @GeneratedValue
+    @Column(unique = true, nullable = false, columnDefinition = "BINARY(16)")
+    private UUID id;
 
     /**
      * Name of the user.
@@ -100,7 +100,6 @@ public class User {
      */
     private Boolean active;
 
-
     public User() {
     }
 
@@ -119,11 +118,11 @@ public class User {
         this.verified = false;
         this.active = false;
     }
-    
-    public Boolean verifyPassword(String password){
+
+    public Boolean verifyPassword(String password) {
         return (this.password.equals(password));
     }
-    
+
     // ============================ Getters and Setters
     // ============================================== //
 
@@ -269,5 +268,18 @@ public class User {
      */
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public void setPassword(String pass1, String pass2) throws IllegalAccessException {
+        if (pass1.equals(pass2)) {
+            this.password = pass1;
+        } else {
+            throw new IllegalAccessException();
+        }
+    }
+
+    public UUID getId() {
+        return this.id;
+
     }
 }
