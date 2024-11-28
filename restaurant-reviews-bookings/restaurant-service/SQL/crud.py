@@ -12,6 +12,7 @@ Description: This module provides functions to create, read, update, and delete 
 from datetime import datetime
 from http.client import HTTPException
 from typing import List, Optional
+import uuid
 from SQL.engine import SessionLocal
 from SQL.models import Address, Booking, Restaurant
 
@@ -54,7 +55,8 @@ def create_restaurant(data: dict):
         dict: Success message confirming restaurant registration.
     """
     restaurant = Restaurant(
-        restaurant_name=data.get("restaurant_name"), restaurant_owner=data.get("user")
+        restaurant_name=data.get("restaurant_name"),
+        restaurant_owner=uuid.UUID(data.get("user")).bytes,
     )
     db.add(restaurant)
     db.commit()
@@ -73,7 +75,7 @@ def create_booking(data: dict):
         dict: Success message confirming booking registration.
     """
     booking = Booking(
-        customer=data.get("user"),
+        customer=uuid.UUID(data.get("user")).bytes,
         restaurant_id=data.get("restaurant_id"),
         booking_date=data.get("booking_date"),
         people_quantity=data.get("quantity"),
@@ -138,7 +140,9 @@ def read_restaurant(current_user: str):
         Restaurant: The Restaurant object for the specified user, or None if not found.
     """
     return (
-        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
+        db.query(Restaurant)
+        .filter(Restaurant.restaurant_owner == uuid.UUID(current_user).bytes)
+        .first()
     )
 
 
@@ -196,7 +200,9 @@ def update_restaurant(current_user: str, restaurant_name: Optional[str] = None):
         HTTPException: If there is no restaurant associated with the account.
     """
     restaurant = (
-        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
+        db.query(Restaurant)
+        .filter(Restaurant.restaurant_owner == uuid.UUID(current_user).bytes)
+        .first()
     )
     if restaurant:
         if restaurant_name is not None:
@@ -229,7 +235,11 @@ def update_booking(
     Raises:
         HTTPException: If there is no active reservation with the account.
     """
-    booking = db.query(Booking).filter(Booking.customer == current_user).first()
+    booking = (
+        db.query(Booking)
+        .filter(Booking.customer == uuid.UUID(current_user).bytes)
+        .first()
+    )
 
     if booking:
         if people_quantity is not None:
@@ -287,7 +297,11 @@ def delete_booking(current_user: str):
     Raises:
         HTTPException: If the booking does not exist.
     """
-    booking = db.query(Booking).filter(Booking.customer == current_user).first()
+    booking = (
+        db.query(Booking)
+        .filter(Booking.customer == uuid.UUID(current_user).bytes)
+        .first()
+    )
     if booking:
         db.delete(booking)
         db.commit()
@@ -310,7 +324,9 @@ def delete_restaurant(current_user: str):
         HTTPException: If the restaurant does not exist.
     """
     restaurant = (
-        db.query(Restaurant).filter(Restaurant.restaurant_owner == current_user).first()
+        db.query(Restaurant)
+        .filter(Restaurant.restaurant_owner == uuid.UUID(current_user).bytes)
+        .first()
     )
 
     if restaurant:

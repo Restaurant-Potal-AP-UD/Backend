@@ -11,6 +11,7 @@ Description: This module provides API endpoints for managing user restaurant in 
 """
 
 from typing import Annotated, List
+from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends
 from SQL.crud import *
 from models.user_management import Restaurant
@@ -33,18 +34,24 @@ def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
     Returns:
         Restaurant: The restaurant information including name, owner, addresses, and bookings.
     """
+
     restaurant_info = read_restaurant(current_user=user.get("sub"))
-    addresses_info = read_addresses(restaurant_info.id)
-    bookings_info = read_bookings(restaurant_id=restaurant_info.id)
 
-    restaurant = Restaurant(
-        restaurant_name=restaurant_info.restaurant_name,
-        restaurant_owner=restaurant_info.restaurant_owner,
-        restaurant_addresses=addresses_info,
-        restaurant_bookings=bookings_info,
-    )
+    if restaurant_info is not None:
+        addresses_info = read_addresses(restaurant_info.id)
+        bookings_info = read_bookings(restaurant_id=restaurant_info.id)
+        restaurant = Restaurant(
+            restaurant_name=restaurant_info.restaurant_name,
+            restaurant_owner=str(uuid.UUID(bytes=restaurant_info.restaurant_owner)),
+            restaurant_addresses=addresses_info,
+            restaurant_bookings=bookings_info,
+        )
 
-    return restaurant
+        return restaurant
+    else:
+        return JSONResponse(
+            status_code=404, content={"detail": "User got no restaurant active"}
+        )
 
 
 @user_restaurant_router.get("/api/get/restaurant/all", response_model=List[Restaurant])
@@ -62,7 +69,7 @@ def get_restaurants():
     for item in restaurants_info:
         restaurant = Restaurant(
             restaurant_name=item.restaurant_name,
-            restaurant_owner=item.restaurant_owner,
+            restaurant_owner=str(uuid.UUID(bytes=item.restaurant_owner)),
             restaurant_addresses=read_addresses(item.id),
             restaurant_bookings=read_bookings(restaurant_id=item.id),
         )

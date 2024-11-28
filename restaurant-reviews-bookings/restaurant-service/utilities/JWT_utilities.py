@@ -7,7 +7,6 @@ It includes a function to decode and verify tokens, checking for expiration and 
 from config import SECRET_KEY, ALGORITHM
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
-from datetime import datetime
 import jwt
 
 # Initialize HTTPBearer security scheme for token verification
@@ -31,18 +30,10 @@ def verify(token: str = Depends(security)) -> dict:
         HTTPException: If the token has expired or is invalid, a 401 Unauthorized exception is raised.
     """
     try:
-        # Get the current time in milliseconds
-        current_time = int(datetime.now().timestamp() * 1000)
-
         # Decode the token
         decoded_token = jwt.decode(
             token.credentials, SECRET_KEY, algorithms=[ALGORITHM]
         )
-
-        # Check if the token has expired
-        if current_time > decoded_token.get("exp"):
-            raise jwt.ExpiredSignatureError
-
         return decoded_token
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
