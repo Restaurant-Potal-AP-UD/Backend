@@ -53,7 +53,7 @@ class Booking(BaseModel):
         number_of_people (int): Number of people for the booking.
     """
 
-    customer: EmailStr
+    customer: str
     booking_date: str
     people_quantity: int
 
@@ -71,6 +71,6 @@ class Restaurant(BaseModel):
     """
 
     restaurant_name: str
-    restaurant_owner: EmailStr
+    restaurant_owner: str
     restaurant_addresses: List[Address | None]
     restaurant_bookings: List[Booking | None]
