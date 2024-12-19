@@ -4,8 +4,8 @@ including the engine, session, and base class for models.
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+
 
 # Database URL for SQLAlchemy connection
 SQLALCHEMY_DATABASE_URL = "mysql+pymysql://python_user:testing@db:3306/python_db"
