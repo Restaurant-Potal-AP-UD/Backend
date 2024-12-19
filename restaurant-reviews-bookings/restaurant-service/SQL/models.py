@@ -9,6 +9,7 @@ class Address(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     street = Column(String(100))
     city = Column(String(100))
+    state = Column(String(100))
     zip_code = Column(Integer)
     location = Column(String(100))
     restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))
@@ -37,6 +38,7 @@ class Restaurant(Base):
     addresses = relationship(
         "Address", back_populates="restaurant", cascade="all, delete"
     )
+
     bookings = relationship(
         "Booking", back_populates="restaurant", cascade="all, delete"
     )

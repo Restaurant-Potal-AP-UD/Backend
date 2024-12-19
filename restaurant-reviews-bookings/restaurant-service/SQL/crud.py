@@ -9,19 +9,21 @@ Description: This module provides functions to create, read, update, and delete 
 
 """
 
-from datetime import datetime
-from http.client import HTTPException
-from typing import List, Optional
 import uuid
+from datetime import datetime
+from typing import List, Optional
+from http.client import HTTPException
+from fastapi.responses import JSONResponse
 from SQL.engine import SessionLocal
 from SQL.models import Address, Booking, Restaurant
+from models.user_management import ShowAddress as ad
 
 db = SessionLocal()
 
 # ====================================== CREATE ================================== #
 
 
-def create_address(data: dict):
+def create_address(address: Address, location: str, restaurant_id: int, user: str):
     """
     Create a new address associated with a specific restaurant.
 
@@ -31,12 +33,23 @@ def create_address(data: dict):
     Returns:
         dict: Success message confirming address registration.
     """
+
+    restaurant = read_restaurant(current_user=user)
+
+    if restaurant.id != restaurant_id:
+        JSONResponse(status_code=500, content={"detail": "Incorrect ID"})
+
+    addresses = db.query(Booking).filter(Booking.restaurant_id == restaurant.id).all()
+
+    if address in addresses:
+        JSONResponse(status_code=500, content={"detail": "Address already exists"})
+
     address = Address(
-        street=data.get("street"),
-        city=data.get("city"),
-        zip_code=data.get("zip_code"),
-        location=data.get("location"),
-        restaurant_id=data.get("restaurant_id"),
+        street=address.street,
+        city=address.city,
+        zip_code=address.zip_code,
+        location=location,
+        restaurant_id=restaurant_id,
     )
     db.add(address)
     db.commit()
@@ -54,14 +67,20 @@ def create_restaurant(data: dict):
     Returns:
         dict: Success message confirming restaurant registration.
     """
-    restaurant = Restaurant(
-        restaurant_name=data.get("restaurant_name"),
-        restaurant_owner=uuid.UUID(data.get("user")).bytes,
-    )
-    db.add(restaurant)
-    db.commit()
-    db.refresh(restaurant)
-    return {"success": "The restaurant has been successfully registered"}
+    if read_restaurant(data.get("user")) is not None:
+        return JSONResponse(
+            status_code=400, content={"detail": "Restaurant already exists"}
+        )
+
+    else:
+        restaurant = Restaurant(
+            restaurant_name=data.get("restaurant_name"),
+            restaurant_owner=uuid.UUID(data.get("user")).bytes,
+        )
+        db.add(restaurant)
+        db.commit()
+        db.refresh(restaurant)
+        return {"success": "The restaurant has been successfully registered"}
 
 
 def create_booking(data: dict):
@@ -74,23 +93,36 @@ def create_booking(data: dict):
     Returns:
         dict: Success message confirming booking registration.
     """
-    booking = Booking(
-        customer=uuid.UUID(data.get("user")).bytes,
-        restaurant_id=data.get("restaurant_id"),
-        booking_date=data.get("booking_date"),
-        people_quantity=data.get("quantity"),
-    )
+    if (
+        db.query(Booking)
+        .filter(
+            Booking.booking_date == data.get("booking_date"),
+            Booking.restaurant_id == data.get("restaurant_id"),
+        )
+        .first()
+        is not None
+    ):
+        return JSONResponse(
+            status_code=400, content={"detail": "Booking already exists"}
+        )
+    else:
+        booking = Booking(
+            customer=uuid.UUID(data.get("user")).bytes,
+            restaurant_id=data.get("restaurant_id"),
+            booking_date=data.get("booking_date"),
+            people_quantity=data.get("quantity"),
+        )
 
-    db.add(booking)
-    db.commit()
-    db.refresh(booking)
-    return {"success": "The booking has been successfully registered"}
+        db.add(booking)
+        db.commit()
+        db.refresh(booking)
+        return {"success": "The booking has been successfully registered"}
 
 
 # ====================================== READ ==================================== #
 
 
-def read_addresses(restaurant_id: int):
+def read_addresses(restaurant_id: int) -> List[ad | None]:
     """
     Retrieve all addresses associated with a specific restaurant by its ID.
 
@@ -100,33 +132,45 @@ def read_addresses(restaurant_id: int):
     Returns:
         list: List of Address objects for the specified restaurant.
     """
-    return db.query(Address).filter(Address.restaurant_id == restaurant_id).all()
+    address = db.query(Address).filter(Address.restaurant_id == restaurant_id).all()
+    return address
 
 
 def read_bookings(
-    user_email: Optional[str] = None, restaurant_id: Optional[int] = None
-) -> List[Booking]:
+    current_user: Optional[str] = None, restaurant_id: Optional[int] = None
+) -> List[Booking] | None:
     """
     Retrieve bookings based on a user email or restaurant ID.
 
     Args:
-        user_email (Optional[str]): Email of the user to filter bookings by customer.
+        current_user (Optional[str]): Email or user ID to filter bookings by customer.
         restaurant_id (Optional[int]): ID of the restaurant to filter bookings.
 
     Returns:
         list: List of Booking objects that match the specified criteria.
 
     Raises:
-        HTTPException: If both user_email and restaurant_id are provided simultaneously.
+        HTTPException: If both current_user and restaurant_id are provided simultaneously or neither is provided.
     """
-    if user_email is not None and restaurant_id is not None:
-        raise HTTPException(status_code=400, detail="Please, set the correct data")
+    if current_user is not None and restaurant_id is not None:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Error"},
+        )
 
-    if user_email is not None:
-        return db.query(Booking).filter(Booking.customer == user_email).all()
+    elif current_user is not None:
+        user_bookings = (
+            db.query(Booking)
+            .filter(Booking.customer == uuid.UUID(current_user).bytes)
+            .all()
+        )
+        return user_bookings if user_bookings else None
 
-    if restaurant_id is not None:
-        return db.query(Booking).filter(Booking.restaurant_id == restaurant_id).all()
+    elif restaurant_id is not None:
+        restaurant_bookings = (
+            db.query(Booking).filter(Booking.restaurant_id == restaurant_id).all()
+        )
+        return restaurant_bookings if restaurant_bookings else None
 
 
 def read_restaurant(current_user: str):
@@ -159,7 +203,7 @@ def read_restaurants() -> List[Restaurant]:
 # ====================================== UPDATE ================================== #
 
 
-def update_address(data: dict, address_id: int):
+def update_address(address: Address):
     """
     Update address information based on the given address ID.
 
@@ -170,12 +214,12 @@ def update_address(data: dict, address_id: int):
     Returns:
         dict: Success message confirming the update.
     """
-    address = db.query(Address).filter(Address.id == address_id).first()
+    address = db.query(Address).filter(Address.id == address.id).first()
     if address:
-        address.city = data.get("city")
-        address.location = data.get("location")
-        address.street = data.get("street")
-        address.zip_code = data.get("zip_code")
+        address.city = address.city
+        address.location = address.location
+        address.street = address.street
+        address.zip_code = address.zip_code
 
         db.commit()
         db.refresh(address)
@@ -185,7 +229,7 @@ def update_address(data: dict, address_id: int):
     raise HTTPException(status_code=404, detail="Address not found")
 
 
-def update_restaurant(current_user: str, restaurant_name: Optional[str] = None):
+def update_restaurant(current_user: str, restaurant_name: str):
     """
     Update restaurant information for the current user (owner).
 
@@ -204,22 +248,26 @@ def update_restaurant(current_user: str, restaurant_name: Optional[str] = None):
         .filter(Restaurant.restaurant_owner == uuid.UUID(current_user).bytes)
         .first()
     )
-    if restaurant:
-        if restaurant_name is not None:
-            restaurant.restaurant_name = restaurant_name
-        db.commit()
-        db.refresh(restaurant)
-        return {"Success": "The information has been changed correctly"}
 
-    raise HTTPException(
-        status_code=404, detail="There is no restaurant associated with this account"
-    )
+    if restaurant is not None:
+        if restaurant.restaurant_name == restaurant_name:
+            return JSONResponse(
+                status_code=400, content={"error": "Restaurant name is the same"}
+            )
+        else:
+            restaurant.restaurant_name = restaurant_name
+            db.commit()
+            db.refresh(restaurant)
+            return {"Success": "The information has been changed correctly"}
+
+    return JSONResponse(status_code=404, content={"error": "Restaurant not found"})
 
 
 def update_booking(
     current_user: str,
-    people_quantity: Optional[int] = None,
-    booking_date: Optional[datetime] = None,
+    booking_id: int,
+    people_quantity: int,
+    booking_date: datetime,
 ):
     """
     Update booking information for the current user.
@@ -235,25 +283,21 @@ def update_booking(
     Raises:
         HTTPException: If there is no active reservation with the account.
     """
-    booking = (
-        db.query(Booking)
-        .filter(Booking.customer == uuid.UUID(current_user).bytes)
-        .first()
-    )
 
-    if booking:
-        if people_quantity is not None:
-            booking.people_quantity = people_quantity
-        if booking_date is not None:
-            booking.booking_date = booking_date
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+
+    if booking and booking.customer == uuid.UUID(current_user).bytes:
+        if booking.booking_date == booking_date:
+            return JSONResponse(status_code=400, content={"error": "Same date"})
+
+        booking.people_quantity = people_quantity
+        booking.booking_date = booking_date
 
         db.commit()
         db.refresh(booking)
         return {"Success": "The booking has been updated correctly"}
 
-    raise HTTPException(
-        status_code=404, detail="There is no active reservation with your account"
-    )
+    return JSONResponse(status_code=400, content={"detail": "Invalid data"})
 
 
 # ====================================== DELETE ================================== #
@@ -284,7 +328,7 @@ def delete_address(address_id: int):
     raise HTTPException(status_code=404, detail="There is no address")
 
 
-def delete_booking(current_user: str):
+def delete_booking(current_user: str, booking_id: int):
     """
     Delete a booking associated with the current user (customer).
 
@@ -297,17 +341,13 @@ def delete_booking(current_user: str):
     Raises:
         HTTPException: If the booking does not exist.
     """
-    booking = (
-        db.query(Booking)
-        .filter(Booking.customer == uuid.UUID(current_user).bytes)
-        .first()
-    )
-    if booking:
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if booking and booking.customer == uuid.UUID(current_user).bytes:
         db.delete(booking)
         db.commit()
         return {"Success": "The booking has been deleted correctly"}
-
-    raise HTTPException(status_code=404, detail="There is no booking")
+    else:
+        return JSONResponse(status_code=400, content={"error": "No booking found"})
 
 
 def delete_restaurant(current_user: str):
@@ -334,4 +374,4 @@ def delete_restaurant(current_user: str):
         db.commit()
         return {"Success": "The restaurant has been deleted correctly"}
 
-    raise HTTPException(status_code=404, detail="There is no restaurant")
+    return JSONResponse(status_code=400, content={"error": "No restaurant found"})

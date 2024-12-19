@@ -21,10 +21,10 @@ Source: http://opensource.org/licenses/GPL-3.0
 """
 
 from typing import List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
-class Address(BaseModel):
+class BaseAddress(BaseModel):
     """
     Class representing an address.
 
@@ -40,7 +40,10 @@ class Address(BaseModel):
     city: str
     state: str
     zip_code: str
-    location: str
+
+
+class ShowAddress(BaseAddress):
+    id: int
 
 
 class Booking(BaseModel):
@@ -72,5 +75,5 @@ class Restaurant(BaseModel):
 
     restaurant_name: str
     restaurant_owner: str
-    restaurant_addresses: List[Address | None]
+    restaurant_addresses: List[ShowAddress | None]
     restaurant_bookings: List[Booking | None]

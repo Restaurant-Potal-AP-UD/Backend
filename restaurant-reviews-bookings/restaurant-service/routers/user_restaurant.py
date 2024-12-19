@@ -12,7 +12,8 @@ Description: This module provides API endpoints for managing user restaurant in 
 
 from typing import Annotated, List
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
+from pymysql import IntegrityError
 from SQL.crud import *
 from models.user_management import Restaurant
 from models.extra_models import Token
@@ -40,11 +41,15 @@ def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
     if restaurant_info is not None:
         addresses_info = read_addresses(restaurant_info.id)
         bookings_info = read_bookings(restaurant_id=restaurant_info.id)
+        if addresses_info is None:
+            addresses_info = []
+        if bookings_info is None:
+            bookings_info = []
         restaurant = Restaurant(
             restaurant_name=restaurant_info.restaurant_name,
             restaurant_owner=str(uuid.UUID(bytes=restaurant_info.restaurant_owner)),
-            restaurant_addresses=addresses_info,
-            restaurant_bookings=bookings_info,
+            restaurant_addresses=list(addresses_info),
+            restaurant_bookings=list(bookings_info),
         )
 
         return restaurant
@@ -55,7 +60,7 @@ def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
 
 
 @user_restaurant_router.get("/api/get/restaurant/all", response_model=List[Restaurant])
-def get_restaurants():
+def get_restaurants(user: Annotated[Token, Depends(verify)]):
     """
     Retrieve a list of all restaurants.
 
@@ -83,7 +88,10 @@ def get_restaurants():
 
 
 @user_restaurant_router.post("/api/create/restaurant/")
-def post_user_restaurant(restaurant_name: str, user: Annotated[Token, Depends(verify)]):
+def post_user_restaurant(
+    restaurant_name: Annotated[str, Body(embed=True)],
+    user: Annotated[Token, Depends(verify)],
+):
     """
     Create a new restaurant for the authenticated user.
 
@@ -101,9 +109,10 @@ def post_user_restaurant(restaurant_name: str, user: Annotated[Token, Depends(ve
 # ============================= UPDATE METHODS ================================= #
 
 
-@user_restaurant_router.patch("/api/update/restaurant/user/")
+@user_restaurant_router.put("/api/update/restaurant/user/")
 def update_user_restaurant(
-    user: Annotated[Token, Depends(verify)], restaurant_name: str
+    user: Annotated[Token, Depends(verify)],
+    restaurant_name: Annotated[str, Body(embed=True)],
 ):
     """
     Update the name of the restaurant for the authenticated user.
@@ -115,9 +124,17 @@ def update_user_restaurant(
     Returns:
         Any: The result of the restaurant update process.
     """
-    return update_restaurant(
-        current_user=user.get("sub"), restaurant_name=restaurant_name
-    )
+    try:
+        if restaurant_name is None or restaurant_name == "":
+            return JSONResponse(
+                status_code=404, content={"error": "Restaurant not found"}
+            )
+
+        return update_restaurant(
+            current_user=user.get("sub"), restaurant_name=restaurant_name
+        )
+    except IntegrityError:
+        return JSONResponse(status_code=400, content={"error": "Invalid ID"})
 
 
 # ============================= DELETE METHODS ==================================== #
