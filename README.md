@@ -66,7 +66,7 @@ This project includes essential unit testing implemented in each language.
   3. [Java Controllers](https://github.com/Restaurant-Potal-AP-UD/Backend/tree/main/login-register/src/test/java/com/dinneconnect/auth/login_register/controllerTest)
 
 
-### Project Structure
+## Project Structure
 
 The project follows a modular structure for an easy comprenhension, the development and maintenance. 
 
