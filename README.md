@@ -16,7 +16,6 @@ It's built as a RESTful API.
 - [Testing](#testing)
   - [Unit Testing](#unit-testing)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
 - [License](#license)
 - [Dev](#dev)
 
@@ -97,4 +96,10 @@ The project follows a modular structure for an easy comprenhension, the developm
   - **`utilities/`**: Functions and tools that are frequently used in other packages
 
 - **`docker-compose.yml`**
-  Configuration for serice deployment through Docker Compose. 
+  Configuration for serice deployment through Docker Compose.
+
+### DEV
+- **Sebastian Avendaño Rodriguez**
+  - savendanor@udistrital.edu.co
+  - Student at: **Universidad Distrital Francisco Jose de Caldas**
+  - Student ID: **20232020101**
