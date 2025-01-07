@@ -29,21 +29,28 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     User findByEmail(String email);
 
     /**
-     * Updates the primary information of a User entity identified by its unique ID.
-     * This includes updating the user's name, surname, username, and email address.
-     *
-     * @param id       the unique identifier of the user to be updated
-     * @param name     the new name of the user
-     * @param surname  the new surname of the user
-     * @param username the new username of the user
-     * @param email    the new email address of the user
-     * @return the number of rows affected by the update
+     * Retrieves a User entity by its username.
+     * 
+     * @param username
+     * @return the User entity associated with the given username information, or
+     *         null if the user doesn't exist
      */
+    User findByUsername(String username);
+
     @Modifying
     @Transactional
-    @Query("UPDATE User u SET u.name = :name, u.surname = :surname, u.username = :username, u.email = :email WHERE u.id = :id")
-    int updatePrimaryInfo(@Param("id") UUID id, @Param("name") String name, @Param("surname") String surname,
-            @Param("username") String username, @Param("email") String email);
+    @Query("UPDATE User u SET " +
+            "u.name = CASE WHEN :name IS NULL THEN u.name ELSE :name END, " +
+            "u.surname = CASE WHEN :surname IS NULL THEN u.surname ELSE :surname END, " +
+            "u.username = CASE WHEN :username IS NULL THEN u.username ELSE :username END, " +
+            "u.email = CASE WHEN :email IS NULL THEN u.email ELSE :email END " +
+            "WHERE u.id = :id")
+    int updatePrimaryInfo(
+            @Param("id") UUID id,
+            @Param("name") String name,
+            @Param("surname") String surname,
+            @Param("username") String username,
+            @Param("email") String email);
 
     /**
      * Updates the password of a User entity identified by its unique ID.

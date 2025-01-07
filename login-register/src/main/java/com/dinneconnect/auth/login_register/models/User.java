@@ -8,6 +8,7 @@ import com.dinneconnect.auth.login_register.DTO.RegisterDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -36,7 +37,7 @@ import jakarta.persistence.Table;
  */
 
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 public class User {
 
     /**
@@ -44,7 +45,7 @@ public class User {
      * This value is generated automatically.
      */
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
@@ -75,13 +76,13 @@ public class User {
     /**
      * Hashed password of the user.
      */
-    @Column(unique = true, updatable = true)
+    @Column(unique = false, updatable = true)
     private String password;
 
     /**
      * Creation date of the user account.
      */
-    @Column(unique = true, updatable = true)
+    @Column(unique = false, updatable = true)
     private LocalDateTime creationDate;
 
     /**

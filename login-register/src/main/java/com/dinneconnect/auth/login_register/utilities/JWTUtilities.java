@@ -1,13 +1,13 @@
 package com.dinneconnect.auth.login_register.utilities;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -76,19 +76,19 @@ public class JWTUtilities {
             return claimsMap;
 
         } catch (ExpiredJwtException e) {
-            System.out.println("The token has expired: " + e.getMessage());
+            System.out.println("The token has expired");
             throw e;
         } catch (UnsupportedJwtException e) {
-            System.out.println("The token format is not supported: " + e.getMessage());
+            System.out.println("The token format is not supported");
             throw e;
         } catch (MalformedJwtException e) {
-            System.out.println("The token is malformed: " + e.getMessage());
+            System.out.println("The token is malformed");
             throw e;
         } catch (SignatureException e) {
-            System.out.println("The token signature is invalid: " + e.getMessage());
+            System.out.println("The token signature is invalid");
             throw e;
         } catch (IllegalArgumentException e) {
-            System.out.println("The token is empty or null: " + e.getMessage());
+            System.out.println("The token is empty or null");
             throw e;
         }
     }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dinneconnect.auth.login_register.DTO.UpdatePasswordDTO;
 import com.dinneconnect.auth.login_register.DTO.UpdatePrimaryInfoDTO;
 import com.dinneconnect.auth.login_register.DTO.UserResponseDTO;
 import com.dinneconnect.auth.login_register.models.User;
@@ -101,8 +100,7 @@ public class LoginController {
                 UserResponseDTO userDTO = utilities.UserToUserDTO(user);
                 return ResponseEntity.ok().body(userDTO);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new UserResponseDTO("The token it's no valid"));
+                return ResponseEntity.badRequest().body(new UserResponseDTO("Something went wrong"));
             }
         } catch (ExpiredJwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -119,6 +117,9 @@ public class LoginController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new UserResponseDTO("Token it's null"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new UserResponseDTO(e.getMessage()));
         }
     }
 
@@ -130,7 +131,7 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @PostMapping("/user/primary/{id}")
+    @PostMapping("/user/primary/")
     public ResponseEntity<String> updateUserInformation(@RequestBody UpdatePrimaryInfoDTO request,
             @RequestHeader("Authorization") String authToken) {
         try {
@@ -154,8 +155,8 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has invalid sign");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Token it's null");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -166,8 +167,8 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @PostMapping("/user/password/{id}")
-    public ResponseEntity<String> changePassword(@RequestBody UpdatePasswordDTO request,
+    @PostMapping("/user/password/")
+    public ResponseEntity<String> changePassword(@RequestBody String request,
             @RequestHeader("Authorization") String authToken) {
         try {
             if (authToken.startsWith("Bearer ")) {
@@ -175,7 +176,7 @@ public class LoginController {
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
                 UUID uuid = UUID.fromString((String) info.get("sub"));
-                return userService.updatePassword(uuid, request.getPassword());
+                return userService.updatePassword(uuid, request);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The token it's no valid");
             }
@@ -191,7 +192,7 @@ public class LoginController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Token it's null");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
 
@@ -201,7 +202,7 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/user/")
     public ResponseEntity<String> deleteUserInformation(@RequestHeader("Authorization") String authToken) {
         try {
             if (authToken.startsWith("Bearer ")) {
@@ -209,12 +210,8 @@ public class LoginController {
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
                 UUID uuid = UUID.fromString((String) info.get("sub"));
-                if (userService.deleteUserById(uuid)) {
-                    return ResponseEntity.ok("User has been deleted correctly.");
-                } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Somethin went wrong");
-                }
+                userService.deleteUserById(uuid);
+                return ResponseEntity.ok().body("User deleted");
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The token it's no valid");
             }
@@ -229,10 +226,19 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has invalid sign");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Token it's null");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
+
+    /*
+     * 
+     * GENERAL USER METHODS TO RETRIEVE INFORMATION GLOBALLY
+     * 
+     * THIS SHOULD BE OFF ON PROD, OR, AT LEAST, SHOULD BE USED WITH CAUTION IN
+     * ROLES
+     * 
+     */
 
     /**
      * Retrieves a list of all users in the system.
