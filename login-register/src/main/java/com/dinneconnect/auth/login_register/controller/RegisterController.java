@@ -2,8 +2,12 @@ package com.dinneconnect.auth.login_register.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +49,11 @@ public class RegisterController {
     @Autowired
     private UserService service;
 
+    public String emaiLRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    public Pattern pattern = Pattern.compile(emaiLRegex);
+    public Matcher matcher;
+    public Map<String, String> response;
+
     /**
      * Registers a new user in the system.
      * 
@@ -56,16 +65,25 @@ public class RegisterController {
      * 
      * @param user a RegisterDTO object containing the user's registration details
      *             such as username, email, and password.
-     * @return a map containing a success message, structured as a JSON response
-     *         with a single key-value pair: { "success": "user registered" }.
+     * @return ResponseEntity containing a JSON response with a success message or
+     *         error details.
      */
     @PostMapping("/post-user/")
-    public Map<String, String> registerUser(@RequestBody RegisterDTO user) {
-        User user_db = new User(user);
-        service.createUser(user_db);
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody RegisterDTO user) {
         Map<String, String> response = new HashMap<>();
-        response.put("success", "user registered");
-        return response;
+        if (service.getUserByEmail(user.getEmail()) != null || service.getUserByUsername(user.getUsername()) != null) {
+            response.put("error", "user or email already exists");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        if (pattern.matcher(user.getEmail()).matches()) {
+            User user_db = new User(user);
+            service.createUser(user_db);
+            response.put("success", "user registered");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            response.put("error", "something went wrong");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
 }

@@ -1,6 +1,8 @@
 package com.dinneconnect.auth.login_register.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +77,16 @@ public class UserService {
     }
 
     /**
+     * Retrieves a user by their username.
+     * 
+     * @param username
+     * @return the user with the specified username
+     */
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    /**
      * Updates the primary information of a user.
      * 
      * @param id   the UUID of the user to update
@@ -83,13 +95,47 @@ public class UserService {
      * @throws RuntimeException if the user is not found
      */
     @Transactional
-    public ResponseEntity<String> updatePrimaryInfo(UUID id, UpdatePrimaryInfoDTO user) {
-        int affectedRows = userRepository.updatePrimaryInfo(id, user.getName(), user.getSurname(), user.getUsername(),
-                user.getEmail());
-        if (affectedRows == 0) {
-            throw new RuntimeException("User  not found");
+    public ResponseEntity<String> updatePrimaryInfo(UUID id, UpdatePrimaryInfoDTO updateDTO) {
+        // Primero obtenemos el usuario actual
+        if (userRepository.findById(id).isEmpty()) {
+            throw new RuntimeException("User not found");
         }
-        return ResponseEntity.ok().body("User  updated successfully");
+        ;
+
+        // Creamos un mapa para almacenar solo los campos que necesitan actualización
+        Map<String, String> fieldsToUpdate = new HashMap<>();
+
+        if (updateDTO.getName() != null) {
+            fieldsToUpdate.put("name", updateDTO.getName());
+        }
+        if (updateDTO.getSurname() != null) {
+            fieldsToUpdate.put("surname", updateDTO.getSurname());
+        }
+        if (updateDTO.getUsername() != null) {
+            fieldsToUpdate.put("username", updateDTO.getUsername());
+        }
+        if (updateDTO.getEmail() != null) {
+            fieldsToUpdate.put("email", updateDTO.getEmail());
+        }
+
+        // Si no hay campos para actualizar, retornamos temprano
+        if (fieldsToUpdate.isEmpty()) {
+            return ResponseEntity.ok().body("No fields to update");
+        }
+
+        // Actualizamos solo los campos no nulos
+        int affectedRows = userRepository.updatePrimaryInfo(
+                id,
+                fieldsToUpdate.get("name"),
+                fieldsToUpdate.get("surname"),
+                fieldsToUpdate.get("username"),
+                fieldsToUpdate.get("email"));
+
+        if (affectedRows == 0) {
+            throw new RuntimeException("Failed to update user");
+        }
+
+        return ResponseEntity.ok().body("User updated successfully");
     }
 
     /**
@@ -127,12 +173,11 @@ public class UserService {
      * @throws IllegalArgumentException if the user with the specified ID does not
      *                                  exist
      */
-    public Boolean deleteUserById(UUID id) {
+    public void deleteUserById(UUID id) {
         if (userRepository.findById(id).isPresent()) {
             userRepository.deleteById(id);
-            return true;
         } else {
-            throw new IllegalArgumentException("User  with ID " + id + " does not exist.");
+            throw new RuntimeException("User  with ID " + id + " does not exist.");
         }
     }
 

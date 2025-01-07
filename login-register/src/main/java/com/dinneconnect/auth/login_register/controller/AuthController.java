@@ -68,7 +68,7 @@ public class AuthController {
 
         // Verify the password provided in the login request
         if (user_auth.verifyPassword(user.getHashed_password())) {
-            // If authentication is successful, return a response with the user's ID
+
             LoginResponseDTO login = new LoginResponseDTO(user_auth.getId());
             return login;
         }
