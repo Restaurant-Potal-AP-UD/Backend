@@ -2,6 +2,7 @@ FROM eclipse-temurin:21
 
 LABEL author="Sebastian Avendaño"
 
+EXPOSE 8080:8080
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /service1
 

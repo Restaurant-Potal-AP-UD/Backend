@@ -62,6 +62,12 @@ class Booking(BaseModel):
 
 
 class Restaurant(BaseModel):
+    restaurant_name: str
+    restaurant_owner: str
+    restaurant_addresses: List[ShowAddress | None]
+
+
+class Restaurant_all(Restaurant):
     """
     Class representing a restaurant.
 
@@ -73,7 +79,8 @@ class Restaurant(BaseModel):
         restaurant_bookings (List[Booking | None]): List of bookings made at the restaurant.
     """
 
-    restaurant_name: str
-    restaurant_owner: str
-    restaurant_addresses: List[ShowAddress | None]
+    restaurant_id: int
+
+
+class Restaurant_user(Restaurant):
     restaurant_bookings: List[Booking | None]

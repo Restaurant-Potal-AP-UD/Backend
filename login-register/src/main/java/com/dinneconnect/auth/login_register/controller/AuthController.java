@@ -3,6 +3,7 @@ package com.dinneconnect.auth.login_register.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,20 +63,17 @@ public class AuthController {
      *         or an empty response if authentication fails
      */
     @PostMapping("/generate-token/")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO user) {
-        // Retrieve the user by email from the user service
-        User user_auth = userService.getUserByEmail(user.getEmail());
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO user) {
 
-        // Verify the password provided in the login request
+        User user_auth = userService.getUserByUsername(user.getUsername());
+
         if (user_auth.verifyPassword(user.getHashed_password())) {
 
-            LoginResponseDTO login = new LoginResponseDTO(user_auth.getId());
-            return login;
+            LoginResponseDTO login = new LoginResponseDTO(user_auth.getId(), user_auth.getUsername());
+            return ResponseEntity.ok().body(login);
         }
 
-        // If authentication fails, return an empty LoginResponseDTO
-        return new LoginResponseDTO();
-        // Future implementation for handling failed login attempts can be added here
+        return ResponseEntity.badRequest().body(new LoginResponseDTO());
     }
 
 }

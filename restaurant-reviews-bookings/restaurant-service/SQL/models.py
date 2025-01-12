@@ -12,7 +12,9 @@ class Address(Base):
     state = Column(String(100))
     zip_code = Column(Integer)
     location = Column(String(100))
-    restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))
+    restaurant_id = Column(
+        Integer, ForeignKey("Restaurant.id")
+    )  # Referencia a Restaurant.id
 
     # Relación inversa con Restaurant
     restaurant = relationship("Restaurant", back_populates="addresses")
@@ -21,11 +23,12 @@ class Address(Base):
 class Booking(Base):
     __tablename__ = "Booking"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    customer = Column(BINARY(16))
-    restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))
+    customer = Column(String(80))
+    restaurant_id = Column(Integer, ForeignKey("Restaurant.id"))  # Nueva llave foránea
     booking_date = Column(DateTime)
-    people_quantity = Column(Integer, default=0)
+    people_quantity = Column(Integer)
 
+    # Relación con Restaurant usando la nueva llave foránea
     restaurant = relationship("Restaurant", back_populates="bookings")
 
 
@@ -34,6 +37,7 @@ class Restaurant(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     restaurant_name = Column(String(80))
     restaurant_owner = Column(BINARY(16))
+    restaurant_owner_name = Column(String(80), unique=True)
 
     addresses = relationship(
         "Address", back_populates="restaurant", cascade="all, delete"

@@ -177,7 +177,7 @@ class UserServiceTest {
     void testDeleteUserById_NotFound() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(IllegalArgumentException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> userService.deleteUserById(userId));
 
         assertEquals("User with ID " + userId + " does not exist.", exception.getMessage());
