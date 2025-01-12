@@ -39,13 +39,17 @@ def read_address(
 def create_restaurant_address(
     address: BaseAddress,
     location: Annotated[str, Body(embed=True)],
-    restaurant_id: Annotated[int, Body(embed=True)],
     user: Annotated[Token, Depends(verify)],
 ):
+    try:
+        int(address.zip_code)
+    except ValueError:
+        return JSONResponse(
+            status_code=400, content={"error": "zip code should be an integer"}
+        )
     return create_address(
         address=address,
         location=location,
-        restaurant_id=restaurant_id,
         user=user.get("sub"),
     )
 

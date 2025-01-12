@@ -48,181 +48,182 @@ import com.dinneconnect.auth.login_register.services.UserService;
 @ActiveProfiles("test")
 public class LoginControllerTest {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+        @Autowired
+        private TestRestTemplate restTemplate;
 
-    @Autowired
-    private UserService userservice;
+        @Autowired
+        private UserService userservice;
 
-    public LoginResponseDTO tokenGood;
-    private RegisterDTO userDTO;
-    private UpdatePrimaryInfoDTO updt;
+        public LoginResponseDTO tokenGood;
+        private RegisterDTO userDTO;
+        private UpdatePrimaryInfoDTO updt;
 
-    /**
-     * Sets up the test environment before each test.
-     * Creates a unique user and obtains a valid authorization token.
-     */
-    @BeforeEach
-    public void setup() {
+        /**
+         * Sets up the test environment before each test.
+         * Creates a unique user and obtains a valid authorization token.
+         */
+        @BeforeEach
+        public void setup() {
 
-        String uniqueEmail = "test" + System.currentTimeMillis() + "@gmail.com";
-        String uniqueUsername = "test" + System.currentTimeMillis();
+                String uniqueEmail = "test" + System.currentTimeMillis() + "@gmail.com";
+                String uniqueUsername = "test" + System.currentTimeMillis();
 
-        userDTO = new RegisterDTO(
-                "sebas",
-                "aven",
-                uniqueUsername,
-                uniqueEmail,
-                "123456782209");
+                userDTO = new RegisterDTO(
+                                "sebas",
+                                "aven",
+                                uniqueUsername,
+                                uniqueEmail,
+                                "123456782209");
 
-        userservice.createUser(new User(userDTO));
-        tokenGood = new LoginResponseDTO(userservice.getUserByEmail(uniqueEmail).getId());
-    }
+                userservice.createUser(new User(userDTO));
+                tokenGood = new LoginResponseDTO(userservice.getUserByEmail(uniqueEmail).getId(),
+                                userDTO.getUsername());
+        }
 
-    /**
-     * Tests a successful user login and retrieves user information.
-     * Verifies that the response status is OK.
-     */
-    @Test
-    public void goodUserTest() {
+        /**
+         * Tests a successful user login and retrieves user information.
+         * Verifies that the response status is OK.
+         */
+        @Test
+        public void goodUserTest() {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
-        System.out.println("Authorization Token: " + this.tokenGood.getValue().get("token"));
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
+                System.out.println("Authorization Token: " + this.tokenGood.getValue().get("token"));
 
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        System.out.println("Request Entity: " + requestEntity);
+                HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+                System.out.println("Request Entity: " + requestEntity);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                "/api/user/",
-                HttpMethod.GET,
-                requestEntity,
-                Map.class);
+                ResponseEntity<Map> response = restTemplate.exchange(
+                                "/api/user/",
+                                HttpMethod.GET,
+                                requestEntity,
+                                Map.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
 
-    /**
-     * Tests an unauthorized user login attempt with an invalid token.
-     * Verifies that the response status is INTERNAL_SERVER_ERROR.
-     */
-    @Test
-    public void badUserTest() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization",
-                "eyJhbGciOiJIUzI1NIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZmUxNjAzOC1jODFhLTRlM2EtYTljMi0yMDdmNGExY2M3ZTMiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTcwMDAwMDAwMH0.SudHBpuBEuC0fX4POEzV0azF4dNIZOlnJJEYgBYLIUg");
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        /**
+         * Tests an unauthorized user login attempt with an invalid token.
+         * Verifies that the response status is INTERNAL_SERVER_ERROR.
+         */
+        @Test
+        public void badUserTest() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization",
+                                "eyJhbGciOiJIUzI1NIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZmUxNjAzOC1jODFhLTRlM2EtYTljMi0yMDdmNGExY2M3ZTMiLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTcwMDAwMDAwMH0.SudHBpuBEuC0fX4POEzV0azF4dNIZOlnJJEYgBYLIUg");
+                HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                "/api/user/",
-                HttpMethod.GET,
-                requestEntity,
-                Map.class);
+                ResponseEntity<Map> response = restTemplate.exchange(
+                                "/api/user/",
+                                HttpMethod.GET,
+                                requestEntity,
+                                Map.class);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        }
 
-    /**
-     * Tests updating user primary information.
-     * Verifies that the response status is OK.
-     */
-    @Test
-    public void userInfoChangeGood() {
-        this.updt = new UpdatePrimaryInfoDTO("Sebastian", "Avendaño", "perra.com", "holauwu@gmail.com");
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
+        /**
+         * Tests updating user primary information.
+         * Verifies that the response status is OK.
+         */
+        @Test
+        public void userInfoChangeGood() {
+                this.updt = new UpdatePrimaryInfoDTO("Sebastian", "Avendaño", "perra.com", "holauwu@gmail.com");
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
 
-        HttpEntity<UpdatePrimaryInfoDTO> requestEntity = new HttpEntity<>(updt, headers);
+                HttpEntity<UpdatePrimaryInfoDTO> requestEntity = new HttpEntity<>(updt, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/user/primary/",
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
+                ResponseEntity<String> response = restTemplate.exchange(
+                                "/api/user/primary/",
+                                HttpMethod.POST,
+                                requestEntity,
+                                String.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
 
-    /**
-     * Tests updating user primary information with wrong user UUID.
-     * Verifies that the response status is BAD REQUEST.
-     */
-    @Test
-    public void userInfoChangeBad() {
-        this.updt = new UpdatePrimaryInfoDTO("Sebastian", "Avendaño", "perra.com", "holauwu@gmail.com");
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization",
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlM2NkZmM4Yi0yN2VmLTQ4YzctOGJlYi04MmY3NjZhM2UzZmMiLCJpYXQiOjE2OTM1NjYwMjUsImV4cCI6Nzc3NTYwMDAyNX0.KIhq13nlJyw2Tw77LHu-p2Q4cUwVinF-B54v6EdOiq0");
+        /**
+         * Tests updating user primary information with wrong user UUID.
+         * Verifies that the response status is BAD REQUEST.
+         */
+        @Test
+        public void userInfoChangeBad() {
+                this.updt = new UpdatePrimaryInfoDTO("Sebastian", "Avendaño", "perra.com", "holauwu@gmail.com");
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlM2NkZmM4Yi0yN2VmLTQ4YzctOGJlYi04MmY3NjZhM2UzZmMiLCJpYXQiOjE2OTM1NjYwMjUsImV4cCI6Nzc3NTYwMDAyNX0.KIhq13nlJyw2Tw77LHu-p2Q4cUwVinF-B54v6EdOiq0");
 
-        HttpEntity<UpdatePrimaryInfoDTO> requestEntity = new HttpEntity<>(updt, headers);
+                HttpEntity<UpdatePrimaryInfoDTO> requestEntity = new HttpEntity<>(updt, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/user/primary/",
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
+                ResponseEntity<String> response = restTemplate.exchange(
+                                "/api/user/primary/",
+                                HttpMethod.POST,
+                                requestEntity,
+                                String.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        }
 
-    /**
-     * Tests changing the user password.
-     * Verifies that the response status is OK.
-     */
-    @Test
-    public void userInfoChangePasswordGood() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
+        /**
+         * Tests changing the user password.
+         * Verifies that the response status is OK.
+         */
+        @Test
+        public void userInfoChangePasswordGood() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
 
-        HttpEntity<String> requestEntity = new HttpEntity<>("sdgakshdasd", headers);
+                HttpEntity<String> requestEntity = new HttpEntity<>("sdgakshdasd", headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/user/password/",
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
+                ResponseEntity<String> response = restTemplate.exchange(
+                                "/api/user/password/",
+                                HttpMethod.POST,
+                                requestEntity,
+                                String.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
 
-    /**
-     * Tests changing the user password with non-existing User UUID.
-     * Verifies that the response status is Bad Request.
-     */
-    @Test
-    public void userInfoChangePasswordBad() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization",
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlM2NkZmM4Yi0yN2VmLTQ4YzctOGJlYi04MmY3NjZhM2UzZmMiLCJpYXQiOjE2OTM1NjYwMjUsImV4cCI6Nzc3NTYwMDAyNX0.KIhq13nlJyw2Tw77LHu-p2Q4cUwVinF-B54v6EdOiq0");
+        /**
+         * Tests changing the user password with non-existing User UUID.
+         * Verifies that the response status is Bad Request.
+         */
+        @Test
+        public void userInfoChangePasswordBad() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlM2NkZmM4Yi0yN2VmLTQ4YzctOGJlYi04MmY3NjZhM2UzZmMiLCJpYXQiOjE2OTM1NjYwMjUsImV4cCI6Nzc3NTYwMDAyNX0.KIhq13nlJyw2Tw77LHu-p2Q4cUwVinF-B54v6EdOiq0");
 
-        HttpEntity<String> requestEntity = new HttpEntity<>("sdgakshdasd", headers);
+                HttpEntity<String> requestEntity = new HttpEntity<>("sdgakshdasd", headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/user/password/",
-                HttpMethod.POST,
-                requestEntity,
-                String.class);
+                ResponseEntity<String> response = restTemplate.exchange(
+                                "/api/user/password/",
+                                HttpMethod.POST,
+                                requestEntity,
+                                String.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        }
 
-    /**
-     * Tests deleting a user account.
-     * Verifies that the response status is OK.
-     */
-    @Test
-    public void userDelete() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
+        /**
+         * Tests deleting a user account.
+         * Verifies that the response status is OK.
+         */
+        @Test
+        public void userDelete() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + this.tokenGood.getValue().get("token"));
 
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+                HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/user/",
-                HttpMethod.DELETE,
-                requestEntity,
-                String.class);
+                ResponseEntity<String> response = restTemplate.exchange(
+                                "/api/user/",
+                                HttpMethod.DELETE,
+                                requestEntity,
+                                String.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+        }
 }

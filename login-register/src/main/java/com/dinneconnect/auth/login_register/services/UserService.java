@@ -63,7 +63,7 @@ public class UserService {
      * @throws RuntimeException if the user is not found
      */
     public User getUserById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User  not found"));
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     /**
@@ -150,9 +150,9 @@ public class UserService {
     public ResponseEntity<String> updatePassword(UUID id, String password) {
         int affectedRows = userRepository.updatePassword(id, password);
         if (affectedRows == 0) {
-            throw new RuntimeException("User  not found");
+            throw new RuntimeException("User not found");
         }
-        return ResponseEntity.ok().body("User  updated successfully");
+        return ResponseEntity.ok().body("User updated successfully");
     }
 
     /**
@@ -177,7 +177,7 @@ public class UserService {
         if (userRepository.findById(id).isPresent()) {
             userRepository.deleteById(id);
         } else {
-            throw new RuntimeException("User  with ID " + id + " does not exist.");
+            throw new RuntimeException("User with ID " + id + " does not exist.");
         }
     }
 

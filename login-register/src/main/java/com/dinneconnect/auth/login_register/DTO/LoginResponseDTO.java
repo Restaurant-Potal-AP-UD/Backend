@@ -29,10 +29,11 @@ public class LoginResponseDTO {
      * 
      * @param uuid the UUID of the user
      */
-    public LoginResponseDTO(UUID uuid) {
+    public LoginResponseDTO(UUID uuid, String username) {
 
         Map<String, String> info = new HashMap<String, String>();
         info.put("userID", uuid.toString());
+        info.put("username", username);
 
         this.token = JWTUtilities.generateToken(info);
         this.caducationDate = new Date(System.currentTimeMillis() + 1800000);
@@ -45,5 +46,9 @@ public class LoginResponseDTO {
         data.put("Caducation", this.caducationDate.toString());
 
         return data;
+    }
+
+    public String getToken() {
+        return this.token;
     }
 }

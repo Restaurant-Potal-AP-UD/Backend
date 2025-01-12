@@ -10,12 +10,18 @@ Description: This module provides API endpoints for managing user restaurant in 
 
 """
 
+from fastapi.responses import JSONResponse
 from typing import Annotated, List
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Body, Depends
 from pymysql import IntegrityError
 from SQL.crud import *
-from models.user_management import Restaurant
+from models.user_management import (
+    Restaurant_all as rta,
+    Restaurant_user as rts,
+    ShowAddress,
+    Booking as bk,
+)
 from models.extra_models import Token
 from utilities.JWT_utilities import verify
 
@@ -24,7 +30,7 @@ user_restaurant_router = APIRouter()
 # ============================= GET METHODS ==================================== #
 
 
-@user_restaurant_router.get("/api/get/restaurant/", response_model=Restaurant)
+@user_restaurant_router.get("/api/get/restaurant/", response_model=rts)
 def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
     """
     Retrieve the restaurant information for the authenticated user.
@@ -35,23 +41,41 @@ def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
     Returns:
         Restaurant: The restaurant information including name, owner, addresses, and bookings.
     """
-
     restaurant_info = read_restaurant(current_user=user.get("sub"))
 
     if restaurant_info is not None:
         addresses_info = read_addresses(restaurant_info.id)
         bookings_info = read_bookings(restaurant_id=restaurant_info.id)
-        if addresses_info is None:
-            addresses_info = []
-        if bookings_info is None:
-            bookings_info = []
-        restaurant = Restaurant(
-            restaurant_name=restaurant_info.restaurant_name,
-            restaurant_owner=str(uuid.UUID(bytes=restaurant_info.restaurant_owner)),
-            restaurant_addresses=list(addresses_info),
-            restaurant_bookings=list(bookings_info),
-        )
 
+        addresses_info = addresses_info or []
+        bookings_info = bookings_info or []
+
+        addresses_list = [
+            ShowAddress(
+                id=address.id,
+                street=address.street,
+                city=address.city,
+                state=address.state,
+                zip_code=str(
+                    address.zip_code,
+                ),
+            )
+            for address in addresses_info
+        ]
+
+        restaurant = rts(
+            restaurant_name=restaurant_info.restaurant_name,
+            restaurant_owner=restaurant_info.restaurant_owner_name,
+            restaurant_addresses=addresses_list,
+            restaurant_bookings=[
+                bk(
+                    customer=booking.customer,
+                    booking_date=booking.booking_date.strftime("%d/%m/%Y %H:%M"),
+                    people_quantity=booking.people_quantity,
+                )
+                for booking in bookings_info
+            ],
+        )
         return restaurant
     else:
         return JSONResponse(
@@ -59,24 +83,42 @@ def get_user_restaurant(user: Annotated[Token, Depends(verify)]):
         )
 
 
-@user_restaurant_router.get("/api/get/restaurant/all", response_model=List[Restaurant])
-def get_restaurants(user: Annotated[Token, Depends(verify)]):
+@user_restaurant_router.get("/api/get/restaurant/all", response_model=List[rta])
+def get_restaurants():
     """
     Retrieve a list of all restaurants.
 
     Returns:
-        List[Restaurant]: A list of all restaurants with their names, owners, addresses, and bookings.
+        List[Restaurant]: List of restaurants with their details, or a JSON response with an error message.
     """
-    list_restaurants = []
-
     restaurants_info = read_restaurants()
 
+    if not restaurants_info:
+        return JSONResponse(
+            status_code=404, content={"detail": "No restaurants found."}
+        )
+
+    list_restaurants = []
     for item in restaurants_info:
-        restaurant = Restaurant(
+        # Leer direcciones y reservas
+        addresses_info = read_addresses(item.id) or []
+
+        addresses_list = [
+            ShowAddress(
+                id=address.id,
+                street=address.street,
+                city=address.city,
+                state=address.state,
+                zip_code=str(address.zip_code),
+            )
+            for address in addresses_info
+        ]
+
+        restaurant = rta(
+            restaurant_id=item.id,
             restaurant_name=item.restaurant_name,
-            restaurant_owner=str(uuid.UUID(bytes=item.restaurant_owner)),
-            restaurant_addresses=read_addresses(item.id),
-            restaurant_bookings=read_bookings(restaurant_id=item.id),
+            restaurant_owner=item.restaurant_owner_name,
+            restaurant_addresses=addresses_list,
         )
 
         list_restaurants.append(restaurant)
@@ -102,7 +144,11 @@ def post_user_restaurant(
     Returns:
         Any: The result of the restaurant creation process.
     """
-    data = {"restaurant_name": restaurant_name, "user": user.get("sub")}
+    data = {
+        "restaurant_name": restaurant_name,
+        "user": user.get("sub"),
+        "username": user.get("username"),
+    }
     return create_restaurant(data=data)
 
 

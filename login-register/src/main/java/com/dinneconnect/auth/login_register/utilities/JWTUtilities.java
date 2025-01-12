@@ -41,6 +41,7 @@ public class JWTUtilities {
     public static String generateToken(Map<String, String> subject) {
         JwtBuilder jwt = Jwts.builder();
         jwt.subject(subject.get("userID"));
+        jwt.claim("username", subject.get("username"));
         jwt.issuedAt(new Date());
         jwt.expiration(new Date(System.currentTimeMillis() + 1800000)); // Token valid for 30 minutes
         jwt.issuer("dinneconect.auth.system");

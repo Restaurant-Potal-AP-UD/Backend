@@ -23,7 +23,7 @@ db = SessionLocal()
 # ====================================== CREATE ================================== #
 
 
-def create_address(address: Address, location: str, restaurant_id: int, user: str):
+def create_address(address: Address, location: str, user: str):
     """
     Create a new address associated with a specific restaurant.
 
@@ -35,10 +35,6 @@ def create_address(address: Address, location: str, restaurant_id: int, user: st
     """
 
     restaurant = read_restaurant(current_user=user)
-
-    if restaurant.id != restaurant_id:
-        JSONResponse(status_code=500, content={"detail": "Incorrect ID"})
-
     addresses = db.query(Booking).filter(Booking.restaurant_id == restaurant.id).all()
 
     if address in addresses:
@@ -47,9 +43,10 @@ def create_address(address: Address, location: str, restaurant_id: int, user: st
     address = Address(
         street=address.street,
         city=address.city,
+        state=address.state,
         zip_code=address.zip_code,
         location=location,
-        restaurant_id=restaurant_id,
+        restaurant_id=restaurant.id,
     )
     db.add(address)
     db.commit()
@@ -76,6 +73,7 @@ def create_restaurant(data: dict):
         restaurant = Restaurant(
             restaurant_name=data.get("restaurant_name"),
             restaurant_owner=uuid.UUID(data.get("user")).bytes,
+            restaurant_owner_name=data.get("username"),
         )
         db.add(restaurant)
         db.commit()
@@ -93,30 +91,18 @@ def create_booking(data: dict):
     Returns:
         dict: Success message confirming booking registration.
     """
-    if (
-        db.query(Booking)
-        .filter(
-            Booking.booking_date == data.get("booking_date"),
-            Booking.restaurant_id == data.get("restaurant_id"),
-        )
-        .first()
-        is not None
-    ):
-        return JSONResponse(
-            status_code=400, content={"detail": "Booking already exists"}
-        )
-    else:
-        booking = Booking(
-            customer=uuid.UUID(data.get("user")).bytes,
-            restaurant_id=data.get("restaurant_id"),
-            booking_date=data.get("booking_date"),
-            people_quantity=data.get("quantity"),
-        )
 
-        db.add(booking)
-        db.commit()
-        db.refresh(booking)
-        return {"success": "The booking has been successfully registered"}
+    booking = Booking(
+        customer=data.get("user"),
+        restaurant_id=data.get("restaurant_id"),
+        booking_date=data.get("booking_date"),
+        people_quantity=data.get("people_quantity"),
+    )
+
+    db.add(booking)
+    db.commit()
+    db.refresh(booking)
+    return {"success": "The booking has been successfully registered"}
 
 
 # ====================================== READ ==================================== #

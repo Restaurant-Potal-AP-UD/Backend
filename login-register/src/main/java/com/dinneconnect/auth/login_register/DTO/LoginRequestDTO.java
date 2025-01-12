@@ -10,7 +10,7 @@ package com.dinneconnect.auth.login_register.DTO;
  */
 public class LoginRequestDTO {
 
-    private String email;
+    private String username;
     private String hashed_password;
 
     /**
@@ -25,8 +25,8 @@ public class LoginRequestDTO {
      * @param email           the email address of the user
      * @param hashed_password the hashed password of the user
      */
-    public LoginRequestDTO(String email, String hashed_password) {
-        this.email = email;
+    public LoginRequestDTO(String username, String hashed_password) {
+        this.username = username;
         this.hashed_password = hashed_password;
     }
 
@@ -35,8 +35,8 @@ public class LoginRequestDTO {
      * 
      * @return the email
      */
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
     /**
@@ -44,8 +44,8 @@ public class LoginRequestDTO {
      * 
      * @param email the email to set
      */
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmail(String username) {
+        this.username = username;
     }
 
     /**

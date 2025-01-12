@@ -120,7 +120,7 @@ def post_user_booking(
         )
 
         data = {
-            "user": user.get("sub"),
+            "user": user.get("username"),
             "restaurant_id": restaurant_id,
             "booking_date": date,
             "people_quantity": people_quantity,
