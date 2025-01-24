@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 ALGORITHM = "HS256"
 SECRET_KEY = "25d3c96542daa0310afb85d88c2d380d4458e19af73ed208f96947c706adee06"
 
@@ -8,3 +11,21 @@ ORIGINS = [
     "http://127.0.0.1:3000",
     # Añade cualquier otro origen que necesites
 ]
+
+PATHS = {
+    "address": Path(
+        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/address.json"
+    ),
+    "booking": Path(
+        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/booking.json"
+    ),
+    "information": Path(
+        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/information.json"
+    ),
+    "restaurant": Path(
+        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/restaurant.json"
+    ),
+    "review": Path(
+        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/review.json"
+    ),
+}
