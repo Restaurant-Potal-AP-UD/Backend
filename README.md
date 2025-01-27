@@ -31,11 +31,8 @@ This project is a backend service designed to handle user management, restaurant
 ### Python
 - **FastAPI**: Used to build the whole source code behind restaurant, reviews and booking information
 
-### MySQL
-- The main database used for persistent storage.
-
-### H2
-- Used for testing purposes.
+### Data Storage
+- The main database used for persistent storage are JSON files, located both into a specific file directory called "persistence"
 
 ### Docker
 - Used for containerization to simplify installation on other machines.
