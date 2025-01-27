@@ -1,15 +1,9 @@
 from pathlib import Path
+from typing import List
 from repository import BaseEntity, BaseRepository
 
 
-class Restaurant(BaseEntity):
-    def __init__(self, restaurant_name: str, restaurant_owner_name: str):
-        super().__init__(
-            restaurant_name=restaurant_name, restaurant_owner_name=restaurant_owner_name
-        )
-
-
-class Booking:
+class Booking(BaseEntity):
 
     def __init__(
         self,
@@ -89,7 +83,10 @@ class Information(BaseEntity):
         )
 
 
-add = BaseRepository(
-    "Backend/restaurant-reviews-bookings/restaurant-service/persistence/address.json"
-)
-print(add.get_entity_by_code(52962509004))
+class Restaurant(BaseEntity):
+    def __init__(self, restaurant_name: str, restaurant_owner_name: str):
+
+        super().__init__(
+            restaurant_name=restaurant_name,
+            restaurant_owner_name=restaurant_owner_name,
+        )

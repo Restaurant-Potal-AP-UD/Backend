@@ -1,28 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from SQL import models
-from SQL.engine import engine, SessionLocal
-from routers.user_restaurant import user_restaurant_router
-from routers.user_booking import user_booking_router
+from routers.user_restaurant_router import user_restaurant_router
+from routers.user_booking_router import user_booking_router
 from routers.address_router import address_router
 from config import ORIGINS
-
-
-def get_db():
-    """
-    Dependency to provide a database session.
-
-    Yields:
-        db (SessionLocal): Database session.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

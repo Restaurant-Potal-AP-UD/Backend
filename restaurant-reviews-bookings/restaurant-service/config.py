@@ -13,19 +13,9 @@ ORIGINS = [
 ]
 
 PATHS = {
-    "address": Path(
-        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/address.json"
-    ),
-    "booking": Path(
-        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/booking.json"
-    ),
-    "information": Path(
-        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/information.json"
-    ),
-    "restaurant": Path(
-        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/restaurant.json"
-    ),
-    "review": Path(
-        "Backend/restaurant-reviews-bookings/restaurant-service/persistence/review.json"
-    ),
+    "address": r"Backend\restaurant-reviews-bookings\restaurant-service\persistence\address.json",
+    "booking": r"Backend\restaurant-reviews-bookings\restaurant-service\persistence\booking.json",
+    "information": r"Backend\restaurant-reviews-bookings\restaurant-service\persistence\information.json",
+    "restaurant": r"Backend\restaurant-reviews-bookings\restaurant-service\persistence\restaurant.json",
+    "review": r"Backend\restaurant-reviews-bookings\restaurant-service\persistence\review.json",
 }

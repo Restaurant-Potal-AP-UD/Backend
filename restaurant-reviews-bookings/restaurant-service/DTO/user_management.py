@@ -29,6 +29,7 @@ class BaseAddress(BaseModel):
     Class representing an address.
 
     Attributes:
+        country (str): Country of the address.
         street (str): Street of the address.
         city (str): City of the address.
         state (str): State of the address.
@@ -36,14 +37,19 @@ class BaseAddress(BaseModel):
         location (str): Additional location information of the address.
     """
 
+    country: str
     street: str
     city: str
     state: str
-    zip_code: str
+    zip_code: int
+    location: str
 
 
 class ShowAddress(BaseAddress):
     id: int
+
+
+# ============================================================================================================== #
 
 
 class Booking(BaseModel):
@@ -56,9 +62,22 @@ class Booking(BaseModel):
         number_of_people (int): Number of people for the booking.
     """
 
-    customer: str
     booking_date: str
-    people_quantity: int
+    people: int
+
+
+class BookingUser(Booking):
+    code: int
+    restaurant_name: str
+    customer: str
+
+
+class BookingRestaurant(Booking):
+    code: int
+    customer: str
+
+
+# ============================================================================================================== #
 
 
 class Restaurant(BaseModel):
@@ -67,7 +86,7 @@ class Restaurant(BaseModel):
     restaurant_addresses: List[ShowAddress | None]
 
 
-class Restaurant_all(Restaurant):
+class RestaurantAll(Restaurant):
     """
     Class representing a restaurant.
 
@@ -82,5 +101,5 @@ class Restaurant_all(Restaurant):
     restaurant_id: int
 
 
-class Restaurant_user(Restaurant):
+class RestaurantUser(Restaurant):
     restaurant_bookings: List[Booking | None]

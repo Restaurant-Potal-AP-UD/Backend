@@ -30,7 +30,16 @@ def verify(token: str = Depends(security)) -> dict:
         HTTPException: If the token has expired or is invalid, a 401 Unauthorized exception is raised.
     """
     try:
-        # Decode the token
+        jwt.decode(token.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        return None
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def decode_token(token: str = Depends(security)) -> dict:
+    try:
         decoded_token = jwt.decode(
             token.credentials, SECRET_KEY, algorithms=[ALGORITHM]
         )
