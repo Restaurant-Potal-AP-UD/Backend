@@ -13,7 +13,6 @@ package com.dinneconnect.auth.login_register.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dinneconnect.auth.login_register.DTO.UpdatePrimaryInfoDTO;
 import com.dinneconnect.auth.login_register.DTO.UserResponseDTO;
-import com.dinneconnect.auth.login_register.models.User;
 import com.dinneconnect.auth.login_register.services.UserService;
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
 import com.dinneconnect.auth.login_register.utilities.UserUtilities;
@@ -80,28 +78,39 @@ public class LoginController {
     @Autowired
     private UserUtilities utilities;
 
-    /**
-     * Retrieves the information of the currently authenticated user.
-     * 
-     * @param authToken the JWT token provided in the Authorization header
-     * @return a ResponseEntity containing the user details or an error message
-     */
-    @GetMapping("/user/")
+    @GetMapping("/get-user")
     public ResponseEntity<UserResponseDTO> getUserInformation(@RequestHeader("Authorization") String authToken) {
-
         try {
-            if (authToken.startsWith("Bearer ")) {
-                authToken = authToken.substring(7);
-                Map<String, Object> info = JWTUtilities.verifyToken(authToken);
-
-                UUID uuid = UUID.fromString((String) info.get("sub"));
-                User user = userService.getUserById(uuid);
-
-                UserResponseDTO userDTO = utilities.UserToUserDTO(user);
-                return ResponseEntity.ok().body(userDTO);
-            } else {
-                return ResponseEntity.badRequest().body(new UserResponseDTO("Something went wrong"));
+            if (!authToken.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest()
+                        .body(new UserResponseDTO("Invalid token format: Bearer prefix required"));
             }
+
+            String token = authToken.substring(7);
+            Map<String, Object> claims = JWTUtilities.verifyToken(token);
+
+            if (claims == null || claims.get("sub") == null) {
+                return ResponseEntity.badRequest()
+                        .body(new UserResponseDTO("Invalid token: missing user information"));
+            }
+
+            Long userId;
+            try {
+                userId = Long.parseLong(claims.get("sub").toString());
+            } catch (NumberFormatException e) {
+                return ResponseEntity.badRequest()
+                        .body(new UserResponseDTO("Invalid user ID format in token"));
+            }
+
+            UserResponseDTO user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new UserResponseDTO("User not found"));
+            }
+
+            UserResponseDTO userDTO = utilities.UserToUserDTO(user);
+            return ResponseEntity.ok().body(userDTO);
+
         } catch (ExpiredJwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new UserResponseDTO("Your session has expired"));
@@ -110,16 +119,16 @@ public class LoginController {
                     .body(new UserResponseDTO("Token format is not supported"));
         } catch (MalformedJwtException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new UserResponseDTO("Token it's bad formatted"));
+                    .body(new UserResponseDTO("Token is malformed"));
         } catch (SignatureException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new UserResponseDTO("Token has invalid sign"));
+                    .body(new UserResponseDTO("Invalid token signature"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new UserResponseDTO("Token it's null"));
+                    .body(new UserResponseDTO("Token cannot be null or empty"));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new UserResponseDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new UserResponseDTO("An unexpected error occurred"));
         }
     }
 
@@ -131,7 +140,7 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @PostMapping("/user/primary/")
+    @PostMapping("/update-user/primary/")
     public ResponseEntity<String> updateUserInformation(@RequestBody UpdatePrimaryInfoDTO request,
             @RequestHeader("Authorization") String authToken) {
         try {
@@ -139,8 +148,14 @@ public class LoginController {
                 authToken = authToken.substring(7);
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
-                UUID uuid = UUID.fromString((String) info.get("sub"));
-                return userService.updatePrimaryInfo(uuid, request);
+                Long code = (Long) info.get("sub");
+                Map<String, Boolean> updt = userService.updatePrimaryInfo(code, request);
+
+                if (updt.get("succes")) {
+                    return ResponseEntity.ok().body("User information updated");
+                }
+                return ResponseEntity.badRequest().body("Something went wrong");
+
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The token it's no valid");
             }
@@ -167,7 +182,7 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @PostMapping("/user/password/")
+    @PostMapping("/update-user/password/")
     public ResponseEntity<String> changePassword(@RequestBody String request,
             @RequestHeader("Authorization") String authToken) {
         try {
@@ -175,8 +190,14 @@ public class LoginController {
                 authToken = authToken.substring(7);
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
-                UUID uuid = UUID.fromString((String) info.get("sub"));
-                return userService.updatePassword(uuid, request);
+                Long code = (Long) info.get("sub");
+                Map<String, Boolean> updt = userService.updatePassword(code, request);
+
+                if (updt.get("succes")) {
+                    return ResponseEntity.ok().body("Password updated");
+                }
+                return ResponseEntity.badRequest().body("Something went wrong");
+
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The token it's no valid");
             }
@@ -202,16 +223,22 @@ public class LoginController {
      * @param authToken the JWT token provided in the Authorization header
      * @return a ResponseEntity containing a success message or an error message
      */
-    @DeleteMapping("/user/")
+    @DeleteMapping("/delete-user/")
     public ResponseEntity<String> deleteUserInformation(@RequestHeader("Authorization") String authToken) {
         try {
             if (authToken.startsWith("Bearer ")) {
                 authToken = authToken.substring(7);
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
-                UUID uuid = UUID.fromString((String) info.get("sub"));
-                userService.deleteUserById(uuid);
-                return ResponseEntity.ok().body("User deleted");
+                Long code = Long.parseLong((String) info.get("sub"));
+
+                Map<String, Object> updt = userService.deleteUserById(code);
+
+                if ((Boolean) updt.get("success")) {
+                    return ResponseEntity.ok().body("User deleted");
+                }
+                return ResponseEntity.badRequest().body("Something went wrong");
+
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The token it's no valid");
             }
@@ -246,9 +273,9 @@ public class LoginController {
      * 
      * @return a list of UserResponseDTO objects containing user details
      */
-    @GetMapping("/user/all/testing")
+    @GetMapping("/user/all/testing/")
     public List<UserResponseDTO> getUsers() {
-        List<User> users = userService.getAllUsers();
+        List<UserResponseDTO> users = userService.getAllUsers();
         return utilities.UsersToUserDTOs(users);
     }
 
@@ -260,12 +287,12 @@ public class LoginController {
      *         the user is not found
      */
     @GetMapping("/user/unique/{id}")
-    public UserResponseDTO getUserById(@PathVariable UUID id) {
+    public UserResponseDTO getUserById(@PathVariable Long id) {
         try {
-            User user = userService.getUserById(id);
+            UserResponseDTO user = userService.getUserById(id);
             return utilities.UserToUserDTO(user);
         } catch (RuntimeException e) {
-            return new UserResponseDTO(); // Handle user not found scenario
+            return new UserResponseDTO();
         }
     }
 }

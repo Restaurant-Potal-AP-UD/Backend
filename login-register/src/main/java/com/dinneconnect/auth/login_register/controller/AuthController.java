@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dinneconnect.auth.login_register.models.User;
 import com.dinneconnect.auth.login_register.services.UserService;
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
 
 import com.dinneconnect.auth.login_register.DTO.LoginRequestDTO;
 import com.dinneconnect.auth.login_register.DTO.LoginResponseDTO;
+import com.dinneconnect.auth.login_register.DTO.UserResponseDTO;
 
 /**
  * AuthController is a REST controller that handles user authentication
@@ -65,15 +65,15 @@ public class AuthController {
     @PostMapping("/generate-token/")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO user) {
 
-        User user_auth = userService.getUserByUsername(user.getUsername());
-
-        if (user_auth.verifyPassword(user.getHashed_password())) {
-
-            LoginResponseDTO login = new LoginResponseDTO(user_auth.getId(), user_auth.getUsername());
+        UserResponseDTO user_auth = userService.getUserByUsername(user.getUsername(), user.getHashed_password());
+        if (user_auth != null) {
+            LoginResponseDTO login = new LoginResponseDTO((Long) user_auth.getCode(),
+                    (String) user_auth.getUsername());
             return ResponseEntity.ok().body(login);
+        } else {
+            return ResponseEntity.badRequest().body(new LoginResponseDTO());
         }
 
-        return ResponseEntity.badRequest().body(new LoginResponseDTO());
     }
 
 }

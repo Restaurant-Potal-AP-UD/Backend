@@ -56,4 +56,11 @@ public class LoginRequestDTO {
     public String getHashed_password() {
         return hashed_password;
     }
+
+    public Boolean verifyPassword(String password) {
+        if (this.hashed_password.equals(password)) {
+            return true;
+        }
+        return false;
+    }
 }

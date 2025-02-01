@@ -3,7 +3,6 @@ package com.dinneconnect.auth.login_register.DTO;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
 
@@ -29,10 +28,10 @@ public class LoginResponseDTO {
      * 
      * @param uuid the UUID of the user
      */
-    public LoginResponseDTO(UUID uuid, String username) {
+    public LoginResponseDTO(Long code, String username) {
 
         Map<String, String> info = new HashMap<String, String>();
-        info.put("userID", uuid.toString());
+        info.put("userID", code.toString());
         info.put("username", username);
 
         this.token = JWTUtilities.generateToken(info);

@@ -1,7 +1,5 @@
 package com.dinneconnect.auth.login_register.DTO;
 
-import java.util.UUID;
-
 /**
  * This module handles data transfer objects (DTOs) for user-related operations.
  * In general, to show low-level user information.
@@ -15,39 +13,30 @@ public class UserResponseDTO {
     @SuppressWarnings("unused")
     private String message;
 
-    private UUID id;
+    private Long code;
     private String name;
     private String surname;
     private String username;
     private String email;
     private String creationDate;
-    private Boolean verified;
-    private Boolean reservation;
 
     /**
      * Constructs a new UserRequestDTO.
      * 
-     * @param name          the user's first name
-     * @param surname       the user's surname
-     * @param email         the user's email address
-     * @param creationDate  the date the user was created
-     * @param verified      whether the user is verified
-     * @param reservation   whether the user has reservations
-     * @param restaurantIds the user's associated restaurant IDs
+     * @param name         the user's first name
+     * @param surname      the user's surname
+     * @param email        the user's email address
+     * @param creationDate the date the user was created
+     * 
      */
-    public UserResponseDTO(UUID user_id, String name, String surname, String username, String email,
-            String creationDate,
-            Boolean verified,
-            Boolean reservation) {
-
-        this.id = user_id;
+    public UserResponseDTO(Long code, String name, String surname, String username, String email,
+            String creationDate) {
+        this.code = code;
         this.name = name;
         this.surname = surname;
         this.username = username;
         this.email = email;
         this.creationDate = creationDate;
-        this.verified = verified;
-        this.reservation = reservation;
     }
 
     public UserResponseDTO(String message) {
@@ -56,10 +45,6 @@ public class UserResponseDTO {
 
     public UserResponseDTO() {
 
-    }
-
-    public String getId() {
-        return id.toString();
     }
 
     /**
@@ -142,39 +127,8 @@ public class UserResponseDTO {
         this.creationDate = creationDate;
     }
 
-    /**
-     * Gets whether the user is verified.
-     * 
-     * @return the verified
-     */
-    public Boolean getVerified() {
-        return verified;
+    public Long getCode() {
+        return code;
     }
 
-    /**
-     * Sets whether the user is verified.
-     * 
-     * @param verified the verified status to set
-     */
-    public void setVerified(Boolean verified) {
-        this.verified = verified;
-    }
-
-    /**
-     * Gets whether the user has reservations.
-     * 
-     * @return the reservation
-     */
-    public Boolean getReservation() {
-        return reservation;
-    }
-
-    /**
-     * Sets whether the user has reservations.
-     * 
-     * @param reservation the reservation status to set
-     */
-    public void setReservation(Boolean reservation) {
-        this.reservation = reservation;
-    }
 }
