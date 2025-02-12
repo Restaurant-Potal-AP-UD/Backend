@@ -4,10 +4,10 @@ This class is the Top interface to access FastAPI application
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers.user_restaurant_router import user_restaurant_router
-from .routers.user_booking_router import user_booking_router
-from .routers.address_router import address_router
-from .config import ORIGINS
+from routers.user_restaurant_router import user_restaurant_router
+from routers.user_booking_router import user_booking_router
+from routers.address_router import address_router
+from config import ORIGINS
 
 app = FastAPI()
 

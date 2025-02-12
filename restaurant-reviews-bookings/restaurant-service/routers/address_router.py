@@ -26,10 +26,10 @@ API Routes:
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Path
 from fastapi.responses import JSONResponse
-from ..utilities.JWT_utilities import verify, decode_token
-from ..DTO.user_management import BaseAddress, ShowAddress
-from ..repositories import repository, models
-from ..config import PATHS
+from utilities.JWT_utilities import verify, decode_token
+from DTO.user_management import BaseAddress, ShowAddress
+from repositories import repository, models
+from config import PATHS
 
 address_router = APIRouter()
 

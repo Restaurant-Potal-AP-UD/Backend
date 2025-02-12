@@ -15,16 +15,16 @@ from typing import Annotated, List
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Body, Depends, Path
-from ..DTO.extra_models import Token
-from ..DTO.user_management import (
+from DTO.extra_models import Token
+from DTO.user_management import (
     RestaurantUser,
     RestaurantAll,
     ShowAddress,
     BookingRestaurant,
 )
-from ..utilities.JWT_utilities import decode_token
-from ..repositories import repository, models
-from ..config import PATHS
+from utilities.JWT_utilities import decode_token
+from repositories import repository, models
+from config import PATHS
 
 user_restaurant_router = APIRouter()
 
