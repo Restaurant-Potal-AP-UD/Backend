@@ -1,9 +1,26 @@
-from pathlib import Path
-from typing import List
-from repository import BaseEntity, BaseRepository
+"""
+This class will manage all the persistence entities
+"""
+
+from .repository import BaseEntity
 
 
 class Booking(BaseEntity):
+    """
+    Represents a booking entity in the restaurant service.
+
+    This class manages booking information including customer details,
+    date, number of people, and associated restaurant.
+
+    Args:
+        customer (str): Email or identifier of the customer making the booking
+        booking_date (str): Date and time of the booking
+        people (int): Number of people for the booking
+        restaurant_name (str): Name of the restaurant where booking is made
+
+    Inherits:
+        BaseEntity: Provides basic entity functionality including unique code generation
+    """
 
     def __init__(
         self,
@@ -21,6 +38,23 @@ class Booking(BaseEntity):
 
 
 class Address(BaseEntity):
+    """
+    Represents an address entity for restaurants in the service.
+
+    This class manages detailed address information for restaurant locations.
+
+    Args:
+        street (str): Street address
+        city (str): City name
+        state (str): State or province
+        zip_code (int): Postal code
+        country (str): Country name
+        location (str): Additional location details or reference points
+        restaurant_name (str): Name of the associated restaurant
+
+    Inherits:
+        BaseEntity: Provides basic entity functionality including unique code generation
+    """
 
     def __init__(
         self,
@@ -44,6 +78,21 @@ class Address(BaseEntity):
 
 
 class Review(BaseEntity):
+    """
+    Represents a customer review entity for restaurants.
+
+    This class manages customer feedback including ratings and comments.
+
+    Args:
+        customer (str): Email or identifier of the reviewing customer
+        review_date (str): Date when the review was submitted
+        comment (str): Detailed review text
+        rating (int): Numerical rating given by the customer
+        restaurant_name (str): Name of the reviewed restaurant
+
+    Inherits:
+        BaseEntity: Provides basic entity functionality including unique code generation
+    """
 
     def __init__(
         self,
@@ -63,6 +112,22 @@ class Review(BaseEntity):
 
 
 class Information(BaseEntity):
+    """
+    Represents additional information entity for restaurants.
+
+    This class manages contact and descriptive information for restaurants.
+
+    Args:
+        phone_number1 (str): Primary contact number
+        phone_number2 (str): Secondary contact number
+        email (str): Contact email address
+        url_menu (str): URL to the restaurant's menu
+        description (str): Detailed description of the restaurant
+        restaurant_name (str): Name of the restaurant
+
+    Inherits:
+        BaseEntity: Provides basic entity functionality including unique code generation
+    """
 
     def __init__(
         self,
@@ -84,8 +149,20 @@ class Information(BaseEntity):
 
 
 class Restaurant(BaseEntity):
-    def __init__(self, restaurant_name: str, restaurant_owner_name: str):
+    """
+    Represents the main restaurant entity.
 
+    This class manages core restaurant information.
+
+    Args:
+        restaurant_name (str): Unique name of the restaurant
+        restaurant_owner_name (str): Name of the restaurant owner
+
+    Inherits:
+        BaseEntity: Provides basic entity functionality including unique code generation
+    """
+
+    def __init__(self, restaurant_name: str, restaurant_owner_name: str):
         super().__init__(
             restaurant_name=restaurant_name,
             restaurant_owner_name=restaurant_owner_name,

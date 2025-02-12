@@ -1,19 +1,18 @@
 package com.dinneconnect.auth.login_register.services;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.dinneconnect.auth.login_register.DTO.UpdatePrimaryInfoDTO;
+import com.dinneconnect.auth.login_register.DTO.UserResponseDTO;
 import com.dinneconnect.auth.login_register.models.User;
-import com.dinneconnect.auth.login_register.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
+import com.dinneconnect.auth.login_register.repository.BaseRepository;
 
 /**
  * Service class for managing user-related operations.
@@ -34,7 +33,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final BaseRepository userRepository;
 
     /**
      * Constructs a new UserService with the specified UserRepository.
@@ -42,7 +41,7 @@ public class UserService {
      * @param userRepository the repository for user data
      */
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(BaseRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -51,19 +50,50 @@ public class UserService {
      * 
      * @return a list of all users
      */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        List<Map<String, Object>> users = userRepository.getEntities();
+
+        if (users.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        System.out.println(users);
+
+        List<UserResponseDTO> result = new ArrayList<>();
+        for (Map<String, Object> map : users) {
+
+            UserResponseDTO user = new UserResponseDTO(
+                    (Long) map.get("code"),
+                    (String) map.get("name"),
+                    (String) map.get("surname"),
+                    (String) map.get("username"),
+                    (String) map.get("email"),
+                    (String) map.get("creationDate"));
+            result.add(user);
+        }
+        return result;
     }
 
     /**
      * Retrieves a user by their ID.
      * 
-     * @param id the UUID of the user
+     * @param id the long of the user
      * @return the user
      * @throws RuntimeException if the user is not found
      */
-    public User getUserById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponseDTO getUserById(Long id) {
+        Map<String, Object> user = userRepository.getEntityByCode(id);
+        if (user != null) {
+
+            return new UserResponseDTO(
+                    (Long) user.get("code"),
+                    (String) user.get("name"),
+                    (String) user.get("surname"),
+                    (String) user.get("username"),
+                    (String) user.get("email"),
+                    (String) user.get("creationDate"));
+        }
+        return null;
     }
 
     /**
@@ -72,8 +102,19 @@ public class UserService {
      * @param email the email of the user
      * @return the user with the specified email
      */
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public UserResponseDTO getUserByEmail(String email) {
+        Map<String, Object> user = userRepository.getEntityByField("email", email);
+        if (user != null) {
+
+            return new UserResponseDTO(
+                    (Long) user.get("code"),
+                    (String) user.get("name"),
+                    (String) user.get("surname"),
+                    (String) user.get("username"),
+                    (String) user.get("email"),
+                    (String) user.get("creationDate"));
+        }
+        return null;
     }
 
     /**
@@ -82,60 +123,70 @@ public class UserService {
      * @param username
      * @return the user with the specified username
      */
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public UserResponseDTO getUserByUsername(String username, String password) {
+
+        Map<String, Object> user = userRepository.getEntityByField("username", username);
+
+        if ((user != null && ((String) user.get("password")).equals(password))) {
+
+            return new UserResponseDTO(
+                    (Long) user.get("code"),
+                    (String) user.get("name"),
+                    (String) user.get("surname"),
+                    (String) user.get("username"),
+                    (String) user.get("email"),
+                    (String) user.get("creationDate"));
+        }
+        return null;
     }
 
     /**
      * Updates the primary information of a user.
      * 
-     * @param id   the UUID of the user to update
+     * @param id   the Long of the user to update
      * @param user the DTO containing the new primary information
      * @return a ResponseEntity indicating the result of the update operation
      * @throws RuntimeException if the user is not found
      */
-    @Transactional
-    public ResponseEntity<String> updatePrimaryInfo(UUID id, UpdatePrimaryInfoDTO updateDTO) {
-        // Primero obtenemos el usuario actual
-        if (userRepository.findById(id).isEmpty()) {
+    public Map<String, Boolean> updatePrimaryInfo(Long id, UpdatePrimaryInfoDTO updateDTO) {
+
+        if (userRepository.getEntityByCode(id).isEmpty()) {
             throw new RuntimeException("User not found");
         }
-        ;
 
-        // Creamos un mapa para almacenar solo los campos que necesitan actualización
-        Map<String, String> fieldsToUpdate = new HashMap<>();
+        Map<String, Boolean> response;
+        Map<String, Object> updates = new HashMap<>();
 
         if (updateDTO.getName() != null) {
-            fieldsToUpdate.put("name", updateDTO.getName());
+            updates.put("name", updateDTO.getName());
         }
         if (updateDTO.getSurname() != null) {
-            fieldsToUpdate.put("surname", updateDTO.getSurname());
+            updates.put("surname", updateDTO.getSurname());
         }
         if (updateDTO.getUsername() != null) {
-            fieldsToUpdate.put("username", updateDTO.getUsername());
+            updates.put("username", updateDTO.getUsername());
         }
         if (updateDTO.getEmail() != null) {
-            fieldsToUpdate.put("email", updateDTO.getEmail());
+            updates.put("email", updateDTO.getEmail());
         }
 
-        // Si no hay campos para actualizar, retornamos temprano
-        if (fieldsToUpdate.isEmpty()) {
-            return ResponseEntity.ok().body("No fields to update");
+        if (updates.isEmpty()) {
+            response = new HashMap<>();
+            response.put("success", false);
+            return response;
         }
 
-        // Actualizamos solo los campos no nulos
-        int affectedRows = userRepository.updatePrimaryInfo(
-                id,
-                fieldsToUpdate.get("name"),
-                fieldsToUpdate.get("surname"),
-                fieldsToUpdate.get("username"),
-                fieldsToUpdate.get("email"));
+        Map<String, Object> result = userRepository.updateEntity(id, updates);
 
-        if (affectedRows == 0) {
-            throw new RuntimeException("Failed to update user");
+        if (!(boolean) result.get("success")) {
+            response = new HashMap<>();
+            response.put("success", false);
+            return response;
         }
 
-        return ResponseEntity.ok().body("User updated successfully");
+        response = new HashMap<>();
+        response.put("success", false);
+        return response;
     }
 
     /**
@@ -146,13 +197,19 @@ public class UserService {
      * @return a ResponseEntity indicating the result of the update operation
      * @throws RuntimeException if the user is not found
      */
-    @Transactional
-    public ResponseEntity<String> updatePassword(UUID id, String password) {
-        int affectedRows = userRepository.updatePassword(id, password);
-        if (affectedRows == 0) {
+
+    public Map<String, Boolean> updatePassword(Long id, String password) {
+        Map<String, Boolean> response = new HashMap<>();
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("password", password);
+
+        Map<String, Object> update = userRepository.updateEntity(id, updates);
+
+        if (!(boolean) update.get("success")) {
             throw new RuntimeException("User not found");
         }
-        return ResponseEntity.ok().body("User updated successfully");
+        response.put("success", false);
+        return response;
     }
 
     /**
@@ -161,8 +218,8 @@ public class UserService {
      * @param user the user to create
      * @return the created user
      */
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public Map<String, Boolean> createUser(User user) {
+        return userRepository.postEntity(user);
     }
 
     /**
@@ -173,11 +230,14 @@ public class UserService {
      * @throws IllegalArgumentException if the user with the specified ID does not
      *                                  exist
      */
-    public void deleteUserById(UUID id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+    public Map<String, Object> deleteUserById(Long id) {
+        if (userRepository.getEntityByCode(id) != null) {
+            Map<String, Object> user = userRepository.deleteEntityByCode(id);
+            return user;
         } else {
-            throw new RuntimeException("User with ID " + id + " does not exist.");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            return response;
         }
     }
 

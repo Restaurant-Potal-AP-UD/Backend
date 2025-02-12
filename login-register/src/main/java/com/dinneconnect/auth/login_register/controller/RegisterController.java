@@ -70,11 +70,13 @@ public class RegisterController {
      */
     @PostMapping("/post-user/")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody RegisterDTO user) {
+
         Map<String, String> response = new HashMap<>();
-        if (service.getUserByEmail(user.getEmail()) != null || service.getUserByUsername(user.getUsername()) != null) {
+        if (service.getUserByEmail(user.getEmail()) != null || service.getUserByEmail(user.getEmail()) != null) {
             response.put("error", "user or email already exists");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+
         if (pattern.matcher(user.getEmail()).matches()) {
             User user_db = new User(user);
             service.createUser(user_db);

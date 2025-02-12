@@ -3,7 +3,6 @@ package com.dinneconnect.auth.login_register.DTO;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import com.dinneconnect.auth.login_register.utilities.JWTUtilities;
 
@@ -27,12 +26,13 @@ public class LoginResponseDTO {
      * Constructs a new LoginResponseDTO with the specified email.
      * The token should be a JWT in the future.
      * 
-     * @param uuid the UUID of the user
+     * @param Long   the ID of the user
+     * @param String the username
      */
-    public LoginResponseDTO(UUID uuid, String username) {
+    public LoginResponseDTO(Long code, String username) {
 
         Map<String, String> info = new HashMap<String, String>();
-        info.put("userID", uuid.toString());
+        info.put("userID", code.toString());
         info.put("username", username);
 
         this.token = JWTUtilities.generateToken(info);
@@ -40,6 +40,12 @@ public class LoginResponseDTO {
 
     }
 
+    /**
+     * 
+     * This class returns data for JWT Token purpose
+     * 
+     * @return Dictionary with the data that will go into the JWT
+     */
     public Map<String, String> getValue() {
         Map<String, String> data = new HashMap<String, String>();
         data.put("token", this.token);

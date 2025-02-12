@@ -1,16 +1,12 @@
 package com.dinneconnect.auth.login_register.models;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.dinneconnect.auth.login_register.DTO.RegisterDTO;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 /**
  * This class represents a User entity with various attributes related to user
@@ -36,59 +32,49 @@ import jakarta.persistence.Table;
  * @author
  */
 
-@Entity
-@Table(name = "users")
 public class User {
 
-    /**
-     * Unique identifier for the user.
-     * This value is generated automatically.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(unique = true, nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private Long code;
 
     /**
      * Name of the user.
      */
-    @Column(unique = false, updatable = false)
     private String name;
 
     /**
      * Surname of the user.
      */
-    @Column(unique = false, updatable = false)
+
     private String surname;
 
     /**
      * Unique username of the user.
      */
-    @Column(unique = true, updatable = true)
+
     private String username;
 
     /**
      * Unique email of the user.
      */
-    @Column(unique = true, updatable = true)
+
     private String email;
 
     /**
      * Hashed password of the user.
      */
-    @Column(unique = false, updatable = true)
+
     private String password;
 
     /**
      * Creation date of the user account.
      */
-    @Column(unique = false, updatable = true)
-    private LocalDateTime creationDate;
+
+    private String creationDate;
 
     /**
      * Reservation status of the user.
      */
-    @Column(unique = false, updatable = true)
+
     private Boolean reservation;
 
     /**
@@ -109,12 +95,13 @@ public class User {
      * @param user
      */
     public User(RegisterDTO user) {
+        this.code = ThreadLocalRandom.current().nextLong(0, 1000000000000L);
         this.name = user.name;
         this.surname = user.surname;
         this.username = user.username;
         this.email = user.email;
         this.password = user.password;
-        this.creationDate = LocalDateTime.now();
+        this.creationDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
         this.reservation = false;
         this.verified = false;
         this.active = false;
@@ -204,17 +191,8 @@ public class User {
      * 
      * @return the creation date of the user account
      */
-    public LocalDateTime getCreationDate() {
+    public String getCreationDate() {
         return creationDate;
-    }
-
-    /**
-     * Sets the creation date of the user account.
-     * 
-     * @param creationDate the creation date of the user account
-     */
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
     }
 
     /**
@@ -279,8 +257,19 @@ public class User {
         }
     }
 
-    public UUID getId() {
-        return this.id;
+    public Map<String, Object> toDict() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", this.code);
+        map.put("name", this.name);
+        map.put("surname", this.surname);
+        map.put("username", this.username);
+        map.put("email", this.email);
+        map.put("password", this.password);
+        map.put("creationDate", this.creationDate);
+        map.put("reservation", this.reservation);
+        map.put("verified", this.verified);
+        map.put("active", this.active);
 
+        return map;
     }
 }

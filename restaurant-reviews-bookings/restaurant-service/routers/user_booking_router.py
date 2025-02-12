@@ -91,8 +91,6 @@ def get_restaurant_bookings(
         "restaurant_owner_name", user.get("username")
     )
 
-    print(restaurant_owner)
-
     if (
         restaurant_bookings is not None
         and restaurant_owner is not None
