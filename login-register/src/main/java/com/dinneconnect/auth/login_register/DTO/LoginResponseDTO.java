@@ -26,7 +26,8 @@ public class LoginResponseDTO {
      * Constructs a new LoginResponseDTO with the specified email.
      * The token should be a JWT in the future.
      * 
-     * @param uuid the UUID of the user
+     * @param Long   the ID of the user
+     * @param String the username
      */
     public LoginResponseDTO(Long code, String username) {
 
@@ -39,6 +40,12 @@ public class LoginResponseDTO {
 
     }
 
+    /**
+     * 
+     * This class returns data for JWT Token purpose
+     * 
+     * @return Dictionary with the data that will go into the JWT
+     */
     public Map<String, String> getValue() {
         Map<String, String> data = new HashMap<String, String>();
         data.put("token", this.token);

@@ -4,26 +4,27 @@ user_restaurant_router Module
 
 Author: Sebastian Avendaño Rodriguez
 Date: 2024/11/26
-Description: This module provides API endpoints for managing user restaurant in a restaurant management system.
-            It allows users to create, retrieve, update, and delete their bookings. The endpoints are secured
-            with JWT authentication to ensure that only authenticated users can access their restaurant information.
+Description: This module provides API endpoints for managing user restaurant in a restaurant 
+            management system. It allows users to create, retrieve, update, and delete 
+            their bookings. The endpoints are secured with JWT authentication to ensure that 
+            only authenticated users can access their restaurant information.
 
 """
 
-from fastapi.responses import JSONResponse
 from typing import Annotated, List
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Body, Depends
-from DTO.extra_models import Token
-from DTO.user_management import (
+from fastapi import APIRouter, Body, Depends, Path
+from ..DTO.extra_models import Token
+from ..DTO.user_management import (
     RestaurantUser,
     RestaurantAll,
     ShowAddress,
     BookingRestaurant,
 )
-from utilities.JWT_utilities import verify, decode_token
-from repositories import repository, models
-from config import PATHS
+from ..utilities.JWT_utilities import decode_token
+from ..repositories import repository, models
+from ..config import PATHS
 
 user_restaurant_router = APIRouter()
 
@@ -138,6 +139,26 @@ def get_restaurants():
         list_restaurants.append(restaurant)
 
     return list_restaurants
+
+
+@user_restaurant_router.get("/api/get/restaurant/{restaurant_name}")
+def get_restaurant_by_name(restaurant_name: Annotated[str, Path()]):
+    """
+        This class selects the restaurant by the given name
+    Args:
+        restaurant_name (Annotated[str, Path): _description_
+
+    Returns:
+        JSONResponse
+    """
+    restaurant = restaurant_repository.get_entity_by_field(
+        "restaurant_name", restaurant_name
+    )
+
+    if restaurant:
+        return JSONResponse(content=jsonable_encoder(restaurant), status_code=200)
+    else:
+        return JSONResponse(content={"error": "Something Went Wrong"}, status_code=400)
 
 
 # ============================= POST METHODS =================================== #

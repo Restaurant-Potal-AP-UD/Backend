@@ -38,46 +38,53 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
 /**
- * LoginController
+ * REST Controller for managing user operations after authentication.
+ * Provides endpoints for retrieving, updating, and deleting user information.
+ * All secured endpoints require JWT authentication via Bearer token.
  * 
- * This controller handles all user-related actions, including retrieving user
- * details,
- * updating user information, changing passwords, and deleting user accounts.
- * It uses JWT-based authentication to secure API endpoints.
+ * Security considerations:
+ * - All endpoints (except testing ones) require valid JWT token
+ * - Tokens must be provided in Authorization header with "Bearer" prefix
+ * - Token validation includes expiration, format and signature checks
  * 
- * Annotations:
- * - @RestController: Marks this class as a REST controller to handle HTTP
- * requests.
- * - @RequestMapping: Maps all API endpoints to the "/api" base path.
+ * Common error scenarios:
+ * - Token expired
+ * - Invalid token format
+ * - Malformed token
+ * - Invalid signature
+ * - Missing or null token
  * 
- * Dependencies:
- * - UserService: Provides business logic for user-related operations.
- * - UserUtilities: Converts User objects to UserResponseDTO objects.
- * - JWTUtilities: Validates and parses JWT tokens.
+ * @RestController Indicates that this class serves REST endpoints
+ *                 @RequestMapping("/api") Base path for all endpoints in this
+ *                 controller
  */
 @RestController
 @RequestMapping("/api")
 public class LoginController {
 
     /**
-     * Utility class for handling JSON Web Tokens (JWTs), including token
-     * validation, parsing, and extraction of claims.
-     */
-
-    /**
-     * Service for handling user-related operations, such as retrieving,
-     * updating, and deleting user information.
+     * Service for handling user-related business operations.
+     * Manages user data persistence, retrieval and modifications.
+     * Injected by Spring's dependency injection.
      */
     @Autowired
     private UserService userService;
 
     /**
-     * Utility class for converting User entities to UserResponseDTO objects
-     * and performing other user-related transformations.
+     * Utility class for data transformation operations.
+     * Handles conversion between entity and DTO objects.
+     * Injected by Spring's dependency injection.
      */
     @Autowired
     private UserUtilities utilities;
 
+    /**
+     * 
+     * This class provides the user information, this is used for settings purpose
+     * 
+     * @param authToken JWT Token
+     * @return UserResponseDTO
+     */
     @GetMapping("/get-user")
     public ResponseEntity<UserResponseDTO> getUserInformation(@RequestHeader("Authorization") String authToken) {
         try {

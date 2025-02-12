@@ -1,5 +1,6 @@
-from pathlib import Path
-
+""" 
+Class configuration to set global variables
+"""
 
 ALGORITHM = "HS256"
 SECRET_KEY = "25d3c96542daa0310afb85d88c2d380d4458e19af73ed208f96947c706adee06"

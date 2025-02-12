@@ -4,16 +4,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.java
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/java_db
-      - SPRING_DATASOURCE_USERNAME=java_user
-      - SPRING_DATASOURCE_PASSWORD=testing
     ports:
       - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-
 
   apppython:
     container_name: restaurant-review-service
@@ -22,25 +14,4 @@ services:
       dockerfile: Dockerfile.python
     ports:
       - "8081:8081"
-    depends_on:
-      db:
-        condition: service_healthy
 
-
-  db:
-    image: mysql:8.0
-    container_name: mysql_db
-    ports:
-      - "3306:3306"
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: testing
-    volumes:
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
