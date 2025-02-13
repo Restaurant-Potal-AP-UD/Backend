@@ -7,7 +7,7 @@ It includes a function to decode and verify tokens, checking for expiration and 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
 import jwt
-from ..config import SECRET_KEY, ALGORITHM
+from config import SECRET_KEY, ALGORITHM
 
 # Initialize HTTPBearer security scheme for token verification
 security = HTTPBearer()

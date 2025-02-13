@@ -11,9 +11,11 @@
 
 package com.dinneconnect.auth.login_register.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -155,10 +157,11 @@ public class LoginController {
                 authToken = authToken.substring(7);
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
-                Long code = (Long) info.get("sub");
+                Long code = Long.parseLong((String) info.get("sub"));
+
                 Map<String, Boolean> updt = userService.updatePrimaryInfo(code, request);
 
-                if (updt.get("succes")) {
+                if (updt.get("success")) {
                     return ResponseEntity.ok().body("User information updated");
                 }
                 return ResponseEntity.badRequest().body("Something went wrong");
@@ -190,17 +193,16 @@ public class LoginController {
      * @return a ResponseEntity containing a success message or an error message
      */
     @PostMapping("/update-user/password/")
-    public ResponseEntity<String> changePassword(@RequestBody String request,
+    public ResponseEntity<String> changePassword(@RequestBody HashMap<String, Object> request,
             @RequestHeader("Authorization") String authToken) {
         try {
             if (authToken.startsWith("Bearer ")) {
                 authToken = authToken.substring(7);
                 Map<String, Object> info = JWTUtilities.verifyToken(authToken);
 
-                Long code = (Long) info.get("sub");
-                Map<String, Boolean> updt = userService.updatePassword(code, request);
-
-                if (updt.get("succes")) {
+                Long code = Long.parseLong((String) info.get("sub"));
+                Map<String, Boolean> updt = userService.updatePassword(code, (String) request.get("request"));
+                if (updt.get("success")) {
                     return ResponseEntity.ok().body("Password updated");
                 }
                 return ResponseEntity.badRequest().body("Something went wrong");

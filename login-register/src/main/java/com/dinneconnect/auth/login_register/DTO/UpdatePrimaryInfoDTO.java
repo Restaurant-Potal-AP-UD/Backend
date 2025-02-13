@@ -8,21 +8,18 @@ package com.dinneconnect.auth.login_register.DTO;
 public class UpdatePrimaryInfoDTO {
     private String name;
     private String surname;
-    private String username;
     private String email;
 
     /**
      * Constructs a new UpdatePrimaryInfoDTO with the specified user information.
      *
-     * @param name     the name of the user
-     * @param surname  the surname of the user
-     * @param username the username of the user
-     * @param email    the email address of the user
+     * @param name    the name of the user
+     * @param surname the surname of the user
+     * @param email   the email address of the user
      */
-    public UpdatePrimaryInfoDTO(String name, String surname, String username, String email) {
+    public UpdatePrimaryInfoDTO(String name, String surname, String email) {
         this.name = name;
         this.surname = surname;
-        this.username = username;
         this.email = email;
     }
 

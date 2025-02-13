@@ -218,9 +218,12 @@ public class BaseRepository {
          * @param updates Map containing the fields to update and their new values
          * @return Map indicating operation success status
          */
-        public Map<String, Object> updateEntity(long code, Map<String, Object> updates) {
+        public Map<String, Boolean> updateEntity(long code, Map<String, Object> updates) {
                 for (Map<String, Object> entity : data) {
-                        if (((Number) entity.get("code")).longValue() == code) {
+                        System.out.println("=====================================");
+                        System.out.println(data);
+                        System.out.println("=====================================");
+                        if (((Long) entity.get("code")).longValue() == code) {
                                 entity.putAll(updates);
                                 save();
                                 return Map.of("success", true);
