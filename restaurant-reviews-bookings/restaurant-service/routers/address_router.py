@@ -99,7 +99,7 @@ def create_restaurant_address(
         JSONResponse: Success message if the address is created,
         otherwise an error message with appropriate HTTP status.
     """
-    if address.zip_code < 0:
+    if int(address.zip_code) < 0:
         return JSONResponse(
             content={"message": "Zip code must be a positive number"}, status_code=400
         )

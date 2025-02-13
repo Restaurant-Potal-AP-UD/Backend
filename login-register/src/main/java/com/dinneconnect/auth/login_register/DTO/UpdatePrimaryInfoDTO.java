@@ -60,24 +60,6 @@ public class UpdatePrimaryInfoDTO {
     }
 
     /**
-     * Retrieves the username of the user.
-     *
-     * @return the username of the user
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username of the user.
-     *
-     * @param username the new username of the user
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
      * Retrieves the email address of the user.
      *
      * @return the email address of the user
