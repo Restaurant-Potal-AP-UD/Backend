@@ -150,23 +150,28 @@ public class UserService {
      */
     public Map<String, Boolean> updatePrimaryInfo(Long id, UpdatePrimaryInfoDTO updateDTO) {
 
-        if (userRepository.getEntityByCode(id).isEmpty()) {
+        Map<String, Object> user = userRepository.getEntityByCode(id);
+
+        if (user.isEmpty()) {
             throw new RuntimeException("User not found");
         }
 
         Map<String, Boolean> response;
         Map<String, Object> updates = new HashMap<>();
 
-        if (updateDTO.getName() != null) {
+        if (updateDTO.getName().equals("") || updateDTO.getName() == null) {
+            updates.put("name", user.get("name"));
+        } else {
             updates.put("name", updateDTO.getName());
         }
-        if (updateDTO.getSurname() != null) {
+        if (updateDTO.getSurname().equals("") || updateDTO.getSurname() == null) {
+            updates.put("surname", user.get("surname"));
+        } else {
             updates.put("surname", updateDTO.getSurname());
         }
-        if (updateDTO.getUsername() != null) {
-            updates.put("username", updateDTO.getUsername());
-        }
-        if (updateDTO.getEmail() != null) {
+        if (updateDTO.getEmail().equals("") || updateDTO.getEmail() == null) {
+            updates.put("email", user.get("email"));
+        } else {
             updates.put("email", updateDTO.getEmail());
         }
 
@@ -176,16 +181,18 @@ public class UserService {
             return response;
         }
 
-        Map<String, Object> result = userRepository.updateEntity(id, updates);
+        Map<String, Boolean> result = userRepository.updateEntity(id, updates);
+        System.out.println("=======================================");
+        System.out.println(result);
 
-        if (!(boolean) result.get("success")) {
+        if (!result.get("success")) {
             response = new HashMap<>();
             response.put("success", false);
             return response;
         }
 
         response = new HashMap<>();
-        response.put("success", false);
+        response.put("success", true);
         return response;
     }
 
@@ -202,10 +209,10 @@ public class UserService {
         Map<String, Boolean> response = new HashMap<>();
         Map<String, Object> updates = new HashMap<>();
         updates.put("password", password);
+        System.out.println(updates);
+        Map<String, Boolean> update = userRepository.updateEntity(id, updates);
 
-        Map<String, Object> update = userRepository.updateEntity(id, updates);
-
-        if (!(boolean) update.get("success")) {
+        if (!update.get("success")) {
             throw new RuntimeException("User not found");
         }
         response.put("success", false);
